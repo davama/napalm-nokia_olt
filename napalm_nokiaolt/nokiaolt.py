@@ -47,6 +47,7 @@ class NokiaDriver(NetworkDriver):
             "alt_host_keys": False,
             "alt_key_file": "",
             "ssh_config_file": None,
+            "read_timeout_override": None,
         }
 
         # Build dict of any optional Netmiko args
