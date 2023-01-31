@@ -77,6 +77,7 @@ class NokiaDriver(NetworkDriver):
             password=self.password,
             **self.netmiko_optional_args
         )
+        self._prep_session()
         # ensure in enable mode
         ## self.device.enable()
 
@@ -99,3 +100,18 @@ class NokiaDriver(NetworkDriver):
                 # If unable to send, we can tell for sure that the connection is unusable
                 return {'is_alive': False}
         ## return {'is_alive': False}
+
+    def _prep_session(self):
+        cmds = [
+            'environment print no-more',
+            'environment inhibit-alarms',
+            'back'
+        ]
+        for command in cmds:
+            self.device.send_command(command, expect_string=r'#')
+
+    def get_config(self):
+        cmd1 = 'show equipment ont interface'
+        cmd2 = 'show equipment ont status pon'
+        cmd3 = 'show equipment ont status x-pon'
+        cmd4 = 'show vlan residential-bridge extensive'
