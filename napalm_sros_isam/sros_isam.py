@@ -110,8 +110,29 @@ class SrosIsamDriver(NetworkDriver):
         for command in cmds:
             self.device.send_command(command, expect_string=r'#')
 
-    def get_config(self):
-        cmd1 = 'show equipment ont interface'
-        cmd2 = 'show equipment ont status pon'
-        cmd3 = 'show equipment ont status x-pon'
-        cmd4 = 'show vlan residential-bridge extensive'
+    def get_config(self, retrieve="all", full=False, sanitized=False):
+        """
+        get_config for sros_isam.
+        """
+        configs = {
+            "running": "",
+            "startup": "No Startup",
+            "candidate": "No Candidate"
+        }
+
+        if retrieve in ("all", "running"):
+            command = "info configure"
+            output_ = self.device.send_command(command, expect_string="#$")
+            if output_:
+                configs['running'] = output_
+                data = str(configs['running']).split("\n")
+                non_empty_lines = [line for line in data if line.strip() != ""]
+
+                string_without_empty_lines = ""
+                for line in non_empty_lines:
+                    string_without_empty_lines += line + "\n"
+                configs['running'] = string_without_empty_lines
+
+        if retrieve.lower() in ('startup', 'all'):
+            pass
+        return configs
