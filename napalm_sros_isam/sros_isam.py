@@ -20,7 +20,7 @@ import napalm.base.constants as C
 import napalm.base.helpers
 
 
-class NokiaDriver(NetworkDriver):
+class SrosIsamDriver(NetworkDriver):
     """NAPALM Nokia OLT Handler."""
 
     def __init__(self, hostname, username, password, timeout=60, optional_args=None):
@@ -63,7 +63,7 @@ class NokiaDriver(NetworkDriver):
         self.device = None
         self.config_replace = False
         self.interface_map = {}
-        self.profile = ["nokiaolt"]
+        self.profile = ["sros_isam"]
 
     def open(self):
         """Open a connection to the device."""
