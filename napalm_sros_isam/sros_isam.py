@@ -161,6 +161,57 @@ class SrosIsamDriver(NetworkDriver):
             pass
         return configs
 
+    def get_facts(self):
+        """
+        get_facts for device
+
+        .. note:
+            serial_number and model are taken from the chassis (shelf 1/1)
+        """
+        hostname_command = 'show equipment isam detail'
+        os_command = 'show software-mngt version ansi'
+        uptime_command = 'show core1-uptime'
+        sn_command = 'show equipment shelf 1/1 detail'
+        port_command = 'show interface port'
+
+        hostname_output = self._send_command(hostname_command, xml_format=True)
+        os_output = self._send_command(os_command, xml_format=True)
+        uptime_output = self._send_command(uptime_command)
+        sn_output = self._send_command(sn_command, xml_format=True)
+        port_output = self._send_command(port_command, xml_format=True)
+
+        # some ansi char codes cleanup
+        port_output = self.device.strip_ansi_escape_codes(port_output)
+        port_output = port_output.replace('-\\','')
+
+        hostname_xml_tree = ET.fromstring(hostname_output)
+        os_xml_tree = ET.fromstring(os_output)
+        sn_xml_tree = ET.fromstring(sn_output)
+        port_xml_tree = ET.fromstring(port_output)
+
+        data = {}
+        for elem in hostname_xml_tree.findall('.//hierarchy[@name="isam"]'):
+            dummy_data = self._convert_xml_elem_to_dict(elem=elem)
+            if 'description' in dummy_data:
+                hostname = dummy_data['description']
+                data['hostname'] = hostname
+                data['vendor'] = 'Nokia'
+                data['uptime'] = ''
+                data['os_version'] = ''
+                data['serial_number'] = ''
+                data['model'] = ''
+                data['fqdn'] = 'Unknown'
+                data['interface_list'] = []
+
+        for elem in os_xml_tree.findall('.//hierarchy[@name="ansi"]'):
+            dummy_data = self._convert_xml_elem_to_dict(elem=elem)
+            if 'isam-feature-group' in dummy_data:
+                os_version = dummy_data['isam-feature-group']
+                data['os_version'] = os_version
+
+        for elem in sn_xml_tree.findall('.//hierarchy[@name="shelf"]'):
+            dummy_data = self._convert_xml_elem_to_dict(elem=elem)
+
     def get_vlans(self):
         """
         get_vlans attempt
@@ -203,4 +254,3 @@ class SrosIsamDriver(NetworkDriver):
                 data[vlan_id]['untagged'].append(port)
 
         return data
-
