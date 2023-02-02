@@ -190,6 +190,9 @@ class SrosIsamDriver(NetworkDriver):
         port_xml_tree = ET.fromstring(port_output)
 
         data = {}
+        port_list = []
+
+        # create default dict and get hostname
         for elem in hostname_xml_tree.findall('.//hierarchy[@name="isam"]'):
             dummy_data = self._convert_xml_elem_to_dict(elem=elem)
             if 'description' in dummy_data:
@@ -203,14 +206,46 @@ class SrosIsamDriver(NetworkDriver):
                 data['fqdn'] = 'Unknown'
                 data['interface_list'] = []
 
+        # get os_version
         for elem in os_xml_tree.findall('.//hierarchy[@name="ansi"]'):
             dummy_data = self._convert_xml_elem_to_dict(elem=elem)
             if 'isam-feature-group' in dummy_data:
                 os_version = dummy_data['isam-feature-group']
                 data['os_version'] = os_version
 
+        # get serial_number and model
         for elem in sn_xml_tree.findall('.//hierarchy[@name="shelf"]'):
             dummy_data = self._convert_xml_elem_to_dict(elem=elem)
+            if 'serial-no' in dummy_data:
+                serial_number = dummy_data['serial-no']
+                data['serial_number'] = serial_number
+            if 'variant' in dummy_data:
+                model_number = dummy_data['variant']
+                data['model'] = model_number
+
+        # get uptime
+        for line in uptime_output.splitlines():
+            split_line = line.split()
+            # if line is empty, continue
+            if not split_line:
+                continue
+            if 'System' in split_line[0]:
+                if 'Up' in split_line[1]:
+                    for r in range(4):
+                        split_line.pop(0)
+                    uptime = ' '.join(split_line)
+                    data['uptime'] = uptime
+        # get interface_list
+        for elem in port_xml_tree.findall('.//instance'):
+            dummy_data = self._convert_xml_elem_to_dict(elem=elem)
+            if 'port' in dummy_data:
+                port_raw = dummy_data['port']
+                if 'vlan' in port_raw:
+                    continue
+            port_list.append(port_raw)
+        port_list.sort()
+        data['interface_list'] = port_list
+        return data
 
     def get_vlans(self):
         """
@@ -229,8 +264,7 @@ class SrosIsamDriver(NetworkDriver):
         tag_xml_tree = ET.fromstring(tagging_output)
 
         data = {}
-        # get vlan id and name
-        # additionally set other needed keys
+        # create default dict and get vlan_id and name
         for elem in output_xml_tree.findall('.//instance'):
             dummy_data = self._convert_xml_elem_to_dict(elem=elem)
             primary_key = dummy_data['id']
@@ -241,7 +275,6 @@ class SrosIsamDriver(NetworkDriver):
                 data[primary_key]['voice'] = False
                 data[primary_key]['tagged'] = []
                 data[primary_key]['untagged'] = []
-
         # get tagged/untagged ports
         for elem in tag_xml_tree.findall('.//instance'):
             dummy_data = self._convert_xml_elem_to_dict(elem=elem)
@@ -252,5 +285,4 @@ class SrosIsamDriver(NetworkDriver):
                 data[vlan_id]['tagged'].append(port)
             if 'untagged' in dummy_data['transmit-mode']:
                 data[vlan_id]['untagged'].append(port)
-
         return data
