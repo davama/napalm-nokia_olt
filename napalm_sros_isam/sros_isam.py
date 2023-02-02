@@ -189,7 +189,7 @@ class SrosIsamDriver(NetworkDriver):
         sn_xml_tree = ET.fromstring(sn_output)
         port_xml_tree = ET.fromstring(port_output)
 
-        data = {}
+        facts = {}
         port_list = []
 
         # create default dict and get hostname
@@ -197,31 +197,31 @@ class SrosIsamDriver(NetworkDriver):
             dummy_data = self._convert_xml_elem_to_dict(elem=elem)
             if 'description' in dummy_data:
                 hostname = dummy_data['description']
-                data['hostname'] = hostname
-                data['vendor'] = 'Nokia'
-                data['uptime'] = ''
-                data['os_version'] = ''
-                data['serial_number'] = ''
-                data['model'] = ''
-                data['fqdn'] = 'Unknown'
-                data['interface_list'] = []
+                facts['hostname'] = hostname
+                facts['vendor'] = 'Nokia'
+                facts['uptime'] = ''
+                facts['os_version'] = ''
+                facts['serial_number'] = ''
+                facts['model'] = ''
+                facts['fqdn'] = 'Unknown'
+                facts['interface_list'] = []
 
         # get os_version
         for elem in os_xml_tree.findall('.//hierarchy[@name="ansi"]'):
             dummy_data = self._convert_xml_elem_to_dict(elem=elem)
             if 'isam-feature-group' in dummy_data:
                 os_version = dummy_data['isam-feature-group']
-                data['os_version'] = os_version
+                facts['os_version'] = os_version
 
         # get serial_number and model
         for elem in sn_xml_tree.findall('.//hierarchy[@name="shelf"]'):
             dummy_data = self._convert_xml_elem_to_dict(elem=elem)
             if 'serial-no' in dummy_data:
                 serial_number = dummy_data['serial-no']
-                data['serial_number'] = serial_number
+                facts['serial_number'] = serial_number
             if 'variant' in dummy_data:
                 model_number = dummy_data['variant']
-                data['model'] = model_number
+                facts['model'] = model_number
 
         # get uptime
         for line in uptime_output.splitlines():
@@ -234,7 +234,7 @@ class SrosIsamDriver(NetworkDriver):
                     for r in range(4):
                         split_line.pop(0)
                     uptime = ' '.join(split_line)
-                    data['uptime'] = uptime
+                    facts['uptime'] = uptime
         # get interface_list
         for elem in port_xml_tree.findall('.//instance'):
             dummy_data = self._convert_xml_elem_to_dict(elem=elem)
@@ -244,8 +244,8 @@ class SrosIsamDriver(NetworkDriver):
                     continue
             port_list.append(port_raw)
         port_list.sort()
-        data['interface_list'] = port_list
-        return data
+        facts['interface_list'] = port_list
+        return facts
 
     def get_vlans(self):
         """
@@ -260,15 +260,15 @@ class SrosIsamDriver(NetworkDriver):
         output_xml_tree = ET.fromstring(vlan_name_output)
         tag_xml_tree = ET.fromstring(tagging_output)
 
-        data = {}
+        vlans = {}
         # create default dict and get vlan_id and name
         for elem in output_xml_tree.findall('.//instance'):
             dummy_data = self._convert_xml_elem_to_dict(elem=elem)
             primary_key = dummy_data['id']
-            if primary_key not in data:
-                data[primary_key] = {}
-                data[primary_key]['name'] = dummy_data['name']
-                data[primary_key]['interfaces'] = []
+            if primary_key not in vlans:
+                vlans[primary_key] = {}
+                vlans[primary_key]['name'] = dummy_data['name']
+                vlans[primary_key]['interfaces'] = []
         # get tagged/untagged ports
         for elem in tag_xml_tree.findall('.//instance'):
             dummy_data = self._convert_xml_elem_to_dict(elem=elem)
@@ -276,5 +276,5 @@ class SrosIsamDriver(NetworkDriver):
             port_raw = dummy_data['vlan-port']
             port = ':'.join(port_raw.replace('vlan-port', 'uni').split(':')[0:2])
             if 'single-tagged' in dummy_data['transmit-mode'] or 'untagged' in dummy_data['transmit-mode']:
-                data[vlan_id]['interfaces'].append(port)
-        return data
+                vlans[vlan_id]['interfaces'].append(port)
+        return vlans
