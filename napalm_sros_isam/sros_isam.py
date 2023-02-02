@@ -69,6 +69,9 @@ class SrosIsamDriver(NetworkDriver):
         """
         Send command to device with xml_format option
         """
+        # if true; append xml to the end of the command
+        if xml_format:
+            command = command + ' ' + 'xml'
         output = self.device.send_command(command, expect_string=r'#$')
         return output
 
