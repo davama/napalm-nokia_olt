@@ -249,10 +249,7 @@ class SrosIsamDriver(NetworkDriver):
 
     def get_vlans(self):
         """
-        get_vlans attempt
-
-        .. note:
-            cannot easily determine if a vlan is voice or not. Default will be false
+        get_vlans function
         """
         vlan_name_command = 'show vlan name'
         tagging_command = 'show vlan residential-bridge extensive'
@@ -270,19 +267,14 @@ class SrosIsamDriver(NetworkDriver):
             primary_key = dummy_data['id']
             if primary_key not in data:
                 data[primary_key] = {}
-                data[primary_key]['id'] = primary_key
                 data[primary_key]['name'] = dummy_data['name']
-                data[primary_key]['voice'] = False
-                data[primary_key]['tagged'] = []
-                data[primary_key]['untagged'] = []
+                data[primary_key]['interfaces'] = []
         # get tagged/untagged ports
         for elem in tag_xml_tree.findall('.//instance'):
             dummy_data = self._convert_xml_elem_to_dict(elem=elem)
             vlan_id = dummy_data['vlan-id']
             port_raw = dummy_data['vlan-port']
             port = ':'.join(port_raw.replace('vlan-port', 'uni').split(':')[0:2])
-            if 'single-tagged' in dummy_data['transmit-mode']:
-                data[vlan_id]['tagged'].append(port)
-            if 'untagged' in dummy_data['transmit-mode']:
-                data[vlan_id]['untagged'].append(port)
+            if 'single-tagged' in dummy_data['transmit-mode'] or 'untagged' in dummy_data['transmit-mode']:
+                data[vlan_id]['interfaces'].append(port)
         return data
