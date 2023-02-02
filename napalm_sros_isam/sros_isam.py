@@ -19,6 +19,7 @@ from napalm.base.exceptions import (
 import napalm.base.constants as C
 import napalm.base.helpers
 
+import xml.etree.ElementTree as ET
 
 class SrosIsamDriver(NetworkDriver):
     """NAPALM Nokia OLT Handler."""
@@ -115,7 +116,7 @@ class SrosIsamDriver(NetworkDriver):
         cmds = [
             'environment print no-more',
             'environment inhibit-alarms',
-            'back'
+            'exit all'
         ]
         for command in cmds:
             self._send_command(command)
@@ -159,3 +160,47 @@ class SrosIsamDriver(NetworkDriver):
         if retrieve.lower() in ('startup', 'all'):
             pass
         return configs
+
+    def get_vlans(self):
+        """
+        get_vlans attempt
+
+        .. note:
+            cannot easily determine if a vlan is voice or not. Default will be false
+        """
+        vlan_name_command = 'show vlan name'
+        tagging_command = 'show vlan residential-bridge extensive'
+
+        vlan_name_output = self._send_command(vlan_name_command, xml_format=True)
+        tagging_output = self._send_command(tagging_command, xml_format=True)
+
+        output_xml_tree = ET.fromstring(vlan_name_output)
+        tag_xml_tree = ET.fromstring(tagging_output)
+
+        data = {}
+        # get vlan id and name
+        # additionally set other needed keys
+        for elem in output_xml_tree.findall('.//instance'):
+            dummy_data = self._convert_xml_elem_to_dict(elem=elem)
+            primary_key = dummy_data['id']
+            if primary_key not in data:
+                data[primary_key] = {}
+                data[primary_key]['id'] = primary_key
+                data[primary_key]['name'] = dummy_data['name']
+                data[primary_key]['voice'] = False
+                data[primary_key]['tagged'] = []
+                data[primary_key]['untagged'] = []
+
+        # get tagged/untagged ports
+        for elem in tag_xml_tree.findall('.//instance'):
+            dummy_data = self._convert_xml_elem_to_dict(elem=elem)
+            vlan_id = dummy_data['vlan-id']
+            port_raw = dummy_data['vlan-port']
+            port = ':'.join(port_raw.replace('vlan-port', 'uni').split(':')[0:2])
+            if 'single-tagged' in dummy_data['transmit-mode']:
+                data[vlan_id]['tagged'].append(port)
+            if 'untagged' in dummy_data['transmit-mode']:
+                data[vlan_id]['untagged'].append(port)
+
+        return data
+
