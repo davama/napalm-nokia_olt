@@ -65,6 +65,13 @@ class SrosIsamDriver(NetworkDriver):
         self.interface_map = {}
         self.profile = ["sros_isam"]
 
+    def _send_command(self, command, xml_format=False):
+        """
+        Send command to device with xml_format option
+        """
+        output = self.device.send_command(command, expect_string=r'#$')
+        return output
+
     def open(self):
         """Open a connection to the device."""
         device_type = "cisco_ios_ssh"
@@ -108,7 +115,20 @@ class SrosIsamDriver(NetworkDriver):
             'back'
         ]
         for command in cmds:
-            self.device.send_command(command, expect_string=r'#')
+            self._send_command(command)
+
+    def _convert_xml_elem_to_dict(self, elem=None):
+        """
+        convert xml output to dict data
+        """
+        data = {}
+        for e in elem.iter():
+            if 'instance' == e.tag:
+                continue
+            key_name = e.attrib['name'].replace(' ', '_')
+            key_value = e.text
+            data[key_name] = key_value
+        return data
 
     def get_config(self, retrieve="all", full=False, sanitized=False):
         """
@@ -122,7 +142,7 @@ class SrosIsamDriver(NetworkDriver):
 
         if retrieve in ("all", "running"):
             command = "info configure"
-            output_ = self.device.send_command(command, expect_string="#$")
+            output_ = self._send_command(command)
             if output_:
                 configs['running'] = output_
                 data = str(configs['running']).split("\n")
