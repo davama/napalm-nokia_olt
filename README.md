@@ -1,4 +1,4 @@
-# napalm-sros_isam
+# napalm-nokia_olt
 
 This is a WIP
 
