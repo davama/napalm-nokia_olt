@@ -21,7 +21,8 @@ import napalm.base.helpers
 
 import xml.etree.ElementTree as ET
 
-class SrosIsamDriver(NetworkDriver):
+# napalm_nokia_olt
+class NokiaOltDriver(NetworkDriver):
     """NAPALM Nokia OLT Handler."""
 
     def __init__(self, hostname, username, password, timeout=60, optional_args=None):
@@ -164,7 +165,6 @@ class SrosIsamDriver(NetworkDriver):
     def get_facts(self):
         """
         get_facts for device
-
         .. note:
             serial_number and model are taken from the chassis (shelf 1/1)
         """

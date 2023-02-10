@@ -1,4 +1,5 @@
-"""napalm_nokiaolt package """
-from napalm_sros_isam.sros_isam import SrosIsamDriver
+# load NokiaOltDriver class.
 
-__all__ = ('SrosIsamDriver',)
+
+from napalm_nokia_olt.nokia_olt import NokiaOltDriver
+__all__ = ('NokiaOltDriver',)
