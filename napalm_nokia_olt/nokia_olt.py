@@ -49,6 +49,7 @@ class NokiaOltDriver(NetworkDriver):
             "alt_host_keys": False,
             "alt_key_file": "",
             "ssh_config_file": None,
+            'session_log': None,
             "read_timeout_override": None,
         }
 
