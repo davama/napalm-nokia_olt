@@ -136,6 +136,107 @@ class NokiaOltDriver(NetworkDriver):
             data[key_name] = key_value
         return data
 
+    # taken from netmiko.base_connections
+    def _strip_ansi_escape_codes(self, string_buffer: str) -> str:
+        """
+        Remove any ANSI (VT100) ESC codes from the output
+
+        http://en.wikipedia.org/wiki/ANSI_escape_code
+
+        Note: this does not capture ALL possible ANSI Escape Codes only the ones
+        I have encountered
+
+        Current codes that are filtered:
+        ESC = '\x1b' or chr(27)
+        ESC = is the escape character [^ in hex ('\x1b')
+        ESC[24;27H   Position cursor
+        ESC[?25h     Show the cursor
+        ESC[E        Next line (HP does ESC-E)
+        ESC[K        Erase line from cursor to the end of line
+        ESC[2K       Erase entire line
+        ESC[1;24r    Enable scrolling from start to row end
+        ESC[?6l      Reset mode screen with options 640 x 200 monochrome (graphics)
+        ESC[?7l      Disable line wrapping
+        ESC[2J       Code erase display
+        ESC[00;32m   Color Green (30 to 37 are different colors)
+        ESC[6n       Get cursor position
+        ESC[1D       Move cursor position leftward by x characters (1 in this case)
+        ESC[9999B    Move cursor down N-lines (very large value is attempt to move to the
+                     very bottom of the screen).
+
+        HP ProCurve and Cisco SG300 require this (possible others).
+
+        :param string_buffer: The string to be processed to remove ANSI escape codes
+        :type string_buffer: str
+        """  # noqa
+
+        code_position_cursor = chr(27) + r"\[\d+;\d+H"
+        code_show_cursor = chr(27) + r"\[\?25h"
+        code_next_line = chr(27) + r"E"
+        code_erase_line_end = chr(27) + r"\[K"
+        code_erase_line = chr(27) + r"\[2K"
+        code_erase_start_line = chr(27) + r"\[K"
+        code_enable_scroll = chr(27) + r"\[\d+;\d+r"
+        code_insert_line = chr(27) + r"\[(\d+)L"
+        code_carriage_return = chr(27) + r"\[1M"
+        code_disable_line_wrapping = chr(27) + r"\[\?7l"
+        code_reset_mode_screen_options = chr(27) + r"\[\?\d+l"
+        code_reset_graphics_mode = chr(27) + r"\[00m"
+        code_erase_display = chr(27) + r"\[2J"
+        code_erase_display_0 = chr(27) + r"\[J"
+        code_graphics_mode = chr(27) + r"\[\dm"
+        code_graphics_mode1 = chr(27) + r"\[\d\d;\d\dm"
+        code_graphics_mode2 = chr(27) + r"\[\d\d;\d\d;\d\dm"
+        code_graphics_mode3 = chr(27) + r"\[(3|4)\dm"
+        code_graphics_mode4 = chr(27) + r"\[(9|10)[0-7]m"
+        code_get_cursor_position = chr(27) + r"\[6n"
+        code_cursor_position = chr(27) + r"\[m"
+        code_attrs_off = chr(27) + r"\[0m"
+        code_reverse = chr(27) + r"\[7m"
+        code_cursor_left = chr(27) + r"\[\d+D"
+        code_cursor_forward = chr(27) + r"\[\d*C"
+        code_cursor_up = chr(27) + r"\[\d*A"
+        code_cursor_down = chr(27) + r"\[\d*B"
+        code_wrap_around = chr(27) + r"\[\?7h"
+        code_bracketed_paste_mode = chr(27) + r"\[\?2004h"
+
+        code_set = [
+            code_position_cursor,
+            code_show_cursor,
+            code_erase_line,
+            code_enable_scroll,
+            code_erase_start_line,
+            code_carriage_return,
+            code_disable_line_wrapping,
+            code_erase_line_end,
+            code_reset_mode_screen_options,
+            code_reset_graphics_mode,
+            code_erase_display,
+            code_graphics_mode,
+            code_graphics_mode1,
+            code_graphics_mode2,
+            code_graphics_mode3,
+            code_graphics_mode4,
+            code_get_cursor_position,
+            code_cursor_position,
+            code_erase_display,
+            code_erase_display_0,
+            code_attrs_off,
+            code_reverse,
+            code_cursor_left,
+            code_cursor_up,
+            code_cursor_down,
+            code_cursor_forward,
+            code_wrap_around,
+            code_bracketed_paste_mode,
+        ]
+
+        output = string_buffer
+        for ansi_esc_code in code_set:
+            output = re.sub(f'(-|\\\|\\/|\s|\|){ansi_esc_code}', "", output)
+
+        return output
+
     def get_config(self, retrieve="all", full=False, sanitized=False):
         """
         get_config for sros_isam.
@@ -182,8 +283,7 @@ class NokiaOltDriver(NetworkDriver):
         port_output = self._send_command(port_command, xml_format=True)
 
         # some ansi char codes cleanup
-        port_output = self.device.strip_ansi_escape_codes(port_output)
-        port_output = port_output.replace('-\\','')
+        port_output = self._strip_ansi_escape_codes(port_output)
 
         hostname_xml_tree = ET.fromstring(hostname_output)
         os_xml_tree = ET.fromstring(os_output)
