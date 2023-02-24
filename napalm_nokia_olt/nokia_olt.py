@@ -76,6 +76,7 @@ class NokiaOltDriver(NetworkDriver):
         if xml_format:
             command = command + ' ' + 'xml'
         output = self.device.send_command(command, expect_string=r'#$')
+        output = self._strip_ansi_escape_codes(output)
         return output
 
     def open(self):
@@ -281,9 +282,6 @@ class NokiaOltDriver(NetworkDriver):
         uptime_output = self._send_command(uptime_command)
         sn_output = self._send_command(sn_command, xml_format=True)
         port_output = self._send_command(port_command, xml_format=True)
-
-        # some ansi char codes cleanup
-        port_output = self._strip_ansi_escape_codes(port_output)
 
         hostname_xml_tree = ET.fromstring(hostname_output)
         os_xml_tree = ET.fromstring(os_output)
