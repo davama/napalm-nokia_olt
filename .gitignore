@@ -132,6 +132,7 @@ dist/
 downloads/
 eggs/
 .eggs/
+#napalm_nokia_olt_egg-info/
 lib/
 lib64/
 parts/
