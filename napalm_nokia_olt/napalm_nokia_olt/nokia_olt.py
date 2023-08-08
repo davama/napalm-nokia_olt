@@ -122,6 +122,32 @@ class NokiaOltDriver(NetworkDriver):
         for command in cmds:
             self._send_command(command)
 
+    def convert_xml_to_json(self, xml_data):
+        """Convert xml data to json format"""
+
+        if xml_data:
+            root = """"""
+            for line in xml_data.splitlines():
+                if "hierarchy" in line:
+                    continue
+                root += line
+            root = ET.fromstring(root.strip())
+
+            instances = []
+            for instance_elem in root.findall("instance"):
+                data = {}
+                for element in instance_elem:
+                    name = element.attrib['name']
+                    value = element.text
+                    data[name] = value
+                instances.append(data)
+            return json.dumps(instances, indent=2)
+
+        else:
+            return
+
+
+
     def _convert_xml_elem_to_dict(self, elem=None):
         """
         convert xml output to dict data
