@@ -1,0 +1,27 @@
+Metadata-Version: 2.1
+Name: napalm-nokia-olt
+Version: 0.0.29
+Summary: Network Automation and Programmability Abstraction Layer driver for NOKIA OLT 
+Home-page: https://github.com/davama/napalm-nokia_olt
+Author: Dave Macias
+Author-email: davama@gmail.com
+Keywords: napalm driver
+Classifier: Topic :: Utilities
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Classifier: License :: OSI Approved :: BSD License
+Description-Content-Type: text/markdown
+License-File: LICENSE.md
+
+<!DOCTYPE html>
+
+<h2>napalm-nokia_olt </h2> <br>
+
+<h3>Driver implementation for Nokia Olt</h3> <br>
+
+
+<h5>How to install</h5>
+
+<ul>pip install napalm-nokia_olt</ul>
+
+
