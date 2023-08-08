@@ -147,7 +147,6 @@ class NokiaOltDriver(NetworkDriver):
             return
 
 
-
     def _convert_xml_elem_to_dict(self, elem=None):
         """
         convert xml output to dict data
@@ -334,15 +333,8 @@ class NokiaOltDriver(NetworkDriver):
 
         command = "show equipment ont status x-pon"
         data = self._send_command(command, xml_format=True)
-
-        # Convert XML to OrderedDict
         if data:
-            xml_dict = xmltodict.parse(data, xml_attribs=False)
-            if xml_dict:
-                if "runtime-data" in xml_dict.keys():
-                    xml_dict = xml_dict["runtime-data"]["hierarchy"]["hierarchy"]["hierarchy"]["hierarchy"]["hierarchy"]["instance"]
-                    # Convert OrderedDict to JSON
-                    return json.dumps(xml_dict, indent=4)
+            return self.convert_xml_to_json(data)
         else:
             return f"No available data from the {self.hostname}"
 
@@ -370,15 +362,8 @@ class NokiaOltDriver(NetworkDriver):
 
         command = "show equipment ont interface"
         data = self._send_command(command, xml_format=True)
-
-        # Convert XML to OrderedDict
         if data:
-            xml_dict = xmltodict.parse(data, xml_attribs=False)
-            if xml_dict:
-                if "runtime-data" in xml_dict.keys():
-                    xml_dict = xml_dict["runtime-data"]["hierarchy"]["hierarchy"]["hierarchy"]["hierarchy"]["instance"]
-                    # Convert OrderedDict to JSON
-                    return json.dumps(xml_dict, indent=4)
+            return self.convert_xml_to_json(data)
         else:
             return f"No available data from the {self.hostname}"
 
@@ -405,15 +390,8 @@ class NokiaOltDriver(NetworkDriver):
 
         command = "show equipment ont status pon"
         data = self._send_command(command, xml_format=True)
-
-        # Convert XML to OrderedDict
         if data:
-            xml_dict = xmltodict.parse(data, xml_attribs=False)
-            if xml_dict:
-                if "runtime-data" in xml_dict.keys():
-                    xml_dict = xml_dict["runtime-data"]["hierarchy"]["hierarchy"]["hierarchy"]["hierarchy"]["hierarchy"]["instance"]
-                    # Convert OrderedDict to JSON
-                    return json.dumps(xml_dict, indent=4)
+            return self.convert_xml_to_json(data)
         else:
             return f"No available data from the {self.hostname}"
 
@@ -437,15 +415,8 @@ class NokiaOltDriver(NetworkDriver):
 
         command = "show vlan residential-bridge extensive"
         data = self._send_command(command, xml_format=True)
-
-        # Convert XML to OrderedDict
         if data:
-            xml_dict = xmltodict.parse(data, xml_attribs=False)
-            if xml_dict:
-                if "runtime-data" in xml_dict.keys():
-                    xml_dict = xml_dict["runtime-data"]["hierarchy"]["hierarchy"]["hierarchy"]["hierarchy"]["instance"]
-                    # Convert OrderedDict to JSON
-                    return json.dumps(xml_dict, indent=4)
+            return self.convert_xml_to_json(data)
         else:
             return f"No available data from the {self.hostname}"
 
@@ -467,270 +438,143 @@ class NokiaOltDriver(NetworkDriver):
         """
         command = "show pon unprovision-onu"
         data = self._send_command(command, xml_format=True)
-
-        # Convert XML to OrderedDict
         if data:
-            xml_dict = xmltodict.parse(data, xml_attribs=False)
-            if xml_dict:
-                if "runtime-data" in xml_dict.keys():
-                    xml_dict = xml_dict["runtime-data"]["hierarchy"]["hierarchy"]["hierarchy"]["instance"]
-                    # Convert OrderedDict to JSON
-                    return json.dumps(xml_dict, indent=4)
+            return self.convert_xml_to_json(data)
         else:
             return f"No available data from the {self.hostname}"
 
     def get_equipment_slot(self):
-        """
-        """
+        """"""
         command = "show equipment slot"
         data = self._send_command(command, xml_format=True)
-
-        # Convert XML to OrderedDict
         if data:
-            xml_dict = xmltodict.parse(data, xml_attribs=False)
-            if xml_dict:
-                if "runtime-data" in xml_dict.keys():
-                    xml_dict = xml_dict["runtime-data"]["hierarchy"]["hierarchy"]["hierarchy"]["instance"]
-                    # Convert OrderedDict to JSON
-                    return json.dumps(xml_dict, indent=4)
+            return self.convert_xml_to_json(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_equipment_slot_detail(self):
-        """
-        """
+        """"""
         command = "show equipment slot detail"
         data = self._send_command(command, xml_format=True)
-
-        # Convert XML to OrderedDict
         if data:
-            xml_dict = xmltodict.parse(data, xml_attribs=False)
-            if xml_dict:
-                if "runtime-data" in xml_dict.keys():
-                    xml_dict = xml_dict["runtime-data"]["hierarchy"]["hierarchy"]["hierarchy"]["instance"]
-                    # Convert OrderedDict to JSON
-                    return json.dumps(xml_dict, indent=4)
+            return self.convert_xml_to_json(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_equipment_ont_slot(self):
-        """
-        """
+        """"""
         command = "show equipment ont slot"
         data = self._send_command(command, xml_format=True)
-
-        # Convert XML to OrderedDict
         if data:
-            xml_dict = xmltodict.parse(data, xml_attribs=False)
-            if xml_dict:
-                if "runtime-data" in xml_dict.keys():
-                    xml_dict = xml_dict["runtime-data"]["hierarchy"]["hierarchy"]["hierarchy"]["hierarchy"]["instance"]
-                    # Convert OrderedDict to JSON
-                    return json.dumps(xml_dict, indent=4)
+            return self.convert_xml_to_json(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_equipment_ont_optics(self):
-        """
-        """
+        """"""
         command = "show equipment ont optics"
         data = self._send_command(command, xml_format=True)
-
-        # Convert XML to OrderedDict
         if data:
-            xml_dict = xmltodict.parse(data, xml_attribs=False)
-            if xml_dict:
-                if "runtime-data" in xml_dict.keys():
-                    xml_dict = xml_dict["runtime-data"]["hierarchy"]["hierarchy"]["hierarchy"]["hierarchy"]["instance"]
-                    # Convert OrderedDict to JSON
-                    return json.dumps(xml_dict, indent=4)
+            return self.convert_xml_to_json(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_pon_optics(self):
-        """
-        """
+        """"""
         command = "show pon optics"
         data = self._send_command(command, xml_format=True)
-
-        # Convert XML to OrderedDict
         if data:
-            xml_dict = xmltodict.parse(data, xml_attribs=False)
-            if xml_dict:
-                if "runtime-data" in xml_dict.keys():
-                    xml_dict = xml_dict["runtime-data"]["hierarchy"]["hierarchy"]["hierarchy"]["instance"]
-                    # Convert OrderedDict to JSON
-                    return json.dumps(xml_dict, indent=4)
+            return self.convert_xml_to_json(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_equipment_ont_sw_downloads(self):
-        """
-        """
+        """"""
         command = "show equipment ont sw-download"
         data = self._send_command(command, xml_format=True)
-
-        # Convert XML to OrderedDict
         if data:
-            xml_dict = xmltodict.parse(data, xml_attribs=False)
-            if xml_dict:
-                if "runtime-data" in xml_dict.keys():
-                    xml_dict = xml_dict["runtime-data"]["hierarchy"]["hierarchy"]["hierarchy"]["instance"]
-                    # Convert OrderedDict to JSON
-                    return json.dumps(xml_dict, indent=4)
+            if data:
+                return self.convert_xml_to_json(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
-
     def get_vlan_fdb_board(self):
-        """
-        """
+        """"""
         command = "show vlan fdb-board"
         data = self._send_command(command, xml_format=True)
-
-        # Convert XML to OrderedDict
         if data:
-            xml_dict = xmltodict.parse(data, xml_attribs=False)
-            if xml_dict:
-                if "runtime-data" in xml_dict.keys():
-                    xml_dict = xml_dict["runtime-data"]["hierarchy"]["hierarchy"]["hierarchy"]["instance"]
-                    # Convert OrderedDict to JSON
-                    return json.dumps(xml_dict, indent=4)
+            return self.convert_xml_to_json(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_ethernet_ont_operational_data(self):
-        """
-        """
+        """"""
         command = "show ethernet ont operational-data"
         data = self._send_command(command, xml_format=True)
-
-        # Convert XML to OrderedDict
         if data:
-            xml_dict = xmltodict.parse(data, xml_attribs=False)
-            if xml_dict:
-                if "runtime-data" in xml_dict.keys():
-                    xml_dict = xml_dict["runtime-data"]["hierarchy"]["hierarchy"]["hierarchy"]["hierarchy"]["instance"]
-                    # Convert OrderedDict to JSON
-                    return json.dumps(xml_dict, indent=4)
+            return self.convert_xml_to_json(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_equipment_ont_sw_version(self):
-        """
-        """
+        """"""
         command = "show equipment ont sw-version"
         data = self._send_command(command, xml_format=True)
-
-        # Convert XML to OrderedDict
         if data:
-            xml_dict = xmltodict.parse(data, xml_attribs=False)
-            if xml_dict:
-                if "runtime-data" in xml_dict.keys():
-                    xml_dict = xml_dict["runtime-data"]["hierarchy"]["hierarchy"]["hierarchy"]["hierarchy"]["instance"]
-                    # Convert OrderedDict to JSON
-                    return json.dumps(xml_dict, indent=4)
+            return self.convert_xml_to_json(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_software_mngt_version_etsi(self):
-        """
-        """
+        """"""
         command = "show software-mngt version etsi"
         data = self._send_command(command, xml_format=True)
-
-        # Convert XML to OrderedDict
         if data:
-            xml_dict = xmltodict.parse(data, xml_attribs=False)
-            if xml_dict:
-                if "runtime-data" in xml_dict.keys():
-                    xml_dict = xml_dict["runtime-data"]["hierarchy"]["hierarchy"]["hierarchy"]["hierarchy"]
-                    # Convert OrderedDict to JSON
-                    return json.dumps(xml_dict, indent=4)
+            return self.convert_xml_to_json(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_equipment_transceiver_inventor(self):
-        """
-        """
+        """"""
         command = "show equipment transceiver-inventor"
         data = self._send_command(command, xml_format=True)
-
-        # Convert XML to OrderedDict
         if data:
-            xml_dict = xmltodict.parse(data, xml_attribs=False)
-            if xml_dict:
-                if "runtime-data" in xml_dict.keys():
-                    xml_dict = xml_dict["runtime-data"]["hierarchy"]["hierarchy"]["hierarchy"]["hierarchy"]
-                    # Convert OrderedDict to JSON
-                    return json.dumps(xml_dict, indent=4)
+            return self.convert_xml_to_json(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_equipment_diagnostics_sfp(self):
-        """
-        """
+        """"""
         command = "show equipment diagnostics sfp"
         data = self._send_command(command, xml_format=True)
-
-        # Convert XML to OrderedDict
         if data:
-            xml_dict = xmltodict.parse(data, xml_attribs=False)
-            if xml_dict:
-                if "runtime-data" in xml_dict.keys():
-                    xml_dict = xml_dict["runtime-data"]["hierarchy"]["hierarchy"]["hierarchy"]["hierarchy"]["instance"]
-                    # Convert OrderedDict to JSON
-                    return json.dumps(xml_dict, indent=4)
+            return self.convert_xml_to_json(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_vlan_name(self):
-            """
-            """
+            """"""
             command = "show vlan name"
             data = self._send_command(command, xml_format=True)
-
-            # Convert XML to OrderedDict
             if data:
-                xml_dict = xmltodict.parse(data, xml_attribs=False)
-                if xml_dict:
-                    if "runtime-data" in xml_dict.keys():
-                        xml_dict = xml_dict["runtime-data"]["hierarchy"]["hierarchy"]["hierarchy"]["instance"]
-                        # Convert OrderedDict to JSON
-                        return json.dumps(xml_dict, indent=4)
+                return self.convert_xml_to_json(data)
             else:
                 return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_vlan_bridge_port_fdb(self):
-        """
-        """
+        """"""
         command = "show vlan bridge-port-fdb"
         data = self._send_command(command, xml_format=True)
-
-        # Convert XML to OrderedDict
         if data:
-            xml_dict = xmltodict.parse(data, xml_attribs=False)
-            if xml_dict:
-                if "runtime-data" in xml_dict.keys():
-                    xml_dict = xml_dict["runtime-data"]["hierarchy"]["hierarchy"]["hierarchy"]["instance"]
-                    # Convert OrderedDict to JSON
-                    return json.dumps(xml_dict, indent=4)
+            return self.convert_xml_to_json(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_equipment_temperature(self):
-        """
-        """
+        """"""
         command = "show equipment temperature"
         data = self._send_command(command, xml_format=True)
-
-        # Convert XML to OrderedDict
         if data:
-            xml_dict = xmltodict.parse(data, xml_attribs=False)
-            if xml_dict:
-                if "runtime-data" in xml_dict.keys():
-                    xml_dict = xml_dict["runtime-data"]["hierarchy"]["hierarchy"]["hierarchy"]["instance"]
-                    # Convert OrderedDict to JSON
-                    return json.dumps(xml_dict, indent=4)
+            return self.convert_xml_to_json(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
