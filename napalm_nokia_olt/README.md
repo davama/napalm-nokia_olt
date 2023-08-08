@@ -9,4 +9,3 @@
 
 <ul>pip install napalm-nokia_olt</ul>
 
-
