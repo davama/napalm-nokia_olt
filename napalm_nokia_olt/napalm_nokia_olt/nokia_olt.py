@@ -3,7 +3,6 @@
 
 from __future__ import print_function
 from __future__ import unicode_literals
-from helper.util import *
 import socket
 from netmiko import ConnectHandler
 from napalm.base.base import NetworkDriver
@@ -122,6 +121,17 @@ class NokiaOltDriver(NetworkDriver):
         ]
         for command in cmds:
             self._send_command(command)
+
+    def convert_software_version_xml_to_json(self, xml_data):
+        """Convert software management version xml data to json format"""
+
+        if xml_data:
+            for line in xml_data.splitlines():
+                if "info" in line:
+                    line = line.replace(">", " ").replace("<", " ").replace("name=", "")
+                    line = line.split()
+                    software = f"{line[-2]}"
+                    return json.dumps({'ISAM': software}, indent=2)
 
     def convert_xml_to_json(self, xml_data):
         """Convert xml data to json format"""
@@ -531,7 +541,7 @@ class NokiaOltDriver(NetworkDriver):
         command = "show software-mngt version etsi"
         data = self._send_command(command, xml_format=True)
         if data:
-            return convert_software_version_xml_to_json(data)
+            return self.convert_software_version_xml_to_json(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
