@@ -576,8 +576,30 @@ class NokiaOltDriver(NetworkDriver):
         """"""
         command = "show vlan bridge-port-fdb"
         data = self._send_command(command, xml_format=True)
+
         if data:
-            return self.convert_xml_to_json(data)
+            tmp_data = self.convert_xml_to_json(data)
+            loaded_data = json.loads(tmp_data)
+            new_dict = {}
+
+            for entry in loaded_data:
+                port_ = entry['port']
+                vlan_id_ = entry['vlan-id']
+                mac_ = entry['mac']
+
+                if port_ in new_dict.keys():
+                    tmp_data = new_dict[port_]
+                    for i in tmp_data:
+                        m = i[1]
+                        if m != mac_:
+                            new_dict[port_] += [(vlan_id_, mac_)]
+                            break
+                if port_ not in new_dict.keys():
+                    new_dict[port_] = [(vlan_id_, mac_)]
+
+            return json.dumps(new_dict, indent=4)
+
+
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
