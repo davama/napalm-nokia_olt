@@ -198,12 +198,24 @@ class NokiaOltDriver(NetworkDriver):
             pass
         return configs
 
+    def make_device_model(self, data):
+        """get device model, by parsing the "admin display-config' cmd output """
+
+        if data:
+            lines = data.splitlines()
+            for line in lines:
+                if "Copyright" in line and "NOKIA" in line:
+                    line_list = line.split()
+                    nokia_index = line_list.index("NOKIA")
+                    return f"{line_list[nokia_index + 1]} {line_list[nokia_index + 2]}"
+
     def get_facts(self):
         """
         get_facts for device
         note:
             serial_number and model are taken from the chassis (shelf 1/1)
         """
+        model_command = "admin display-config"
         hostname_command = "show equipment isam detail"
         os_command = "show software-mngt version ansi"
         uptime_command = "show core1-uptime"
@@ -215,6 +227,8 @@ class NokiaOltDriver(NetworkDriver):
         uptime_output = self._send_command(uptime_command)
         sn_output = self._send_command(sn_command, xml_format=True)
         port_output = self._send_command(port_command, xml_format=True)
+        model_output = self._send_command(model_command,xml_format=False)
+        device_model = self.make_device_model(model_output)
 
         hostname_xml_tree = ET.fromstring(hostname_output)
         os_xml_tree = ET.fromstring(os_output)
@@ -222,6 +236,7 @@ class NokiaOltDriver(NetworkDriver):
         port_xml_tree = ET.fromstring(port_output)
 
         facts = {}
+        facts["model"] = device_model
         port_list = []
 
         # create default dict and get hostname
@@ -234,7 +249,6 @@ class NokiaOltDriver(NetworkDriver):
                 facts["uptime"] = ""
                 facts["os_version"] = ""
                 facts["serial_number"] = ""
-                facts["model"] = ""
                 facts["fqdn"] = "Unknown"
                 facts["interface_list"] = []
 
@@ -251,9 +265,6 @@ class NokiaOltDriver(NetworkDriver):
             if "serial-no" in dummy_data:
                 serial_number = dummy_data["serial-no"]
                 facts["serial_number"] = serial_number
-            if "variant" in dummy_data:
-                model_number = dummy_data["variant"]
-                facts["model"] = model_number
 
         # get uptime
         for line in uptime_output.splitlines():
@@ -596,10 +607,7 @@ class NokiaOltDriver(NetworkDriver):
                             break
                 if port_ not in new_dict.keys():
                     new_dict[port_] = [(vlan_id_, mac_)]
-
             return json.dumps(new_dict, indent=4)
-
-
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
