@@ -27,4 +27,4 @@
   <li>get_vlan_bridge_port_fdb</li>
   <li>get_equipment_temperature</li>
 </ul>
-<p>Each function will always return the output in json </p>
+<p>Each function will always return the output as dict data-type </p>
