@@ -122,8 +122,8 @@ class NokiaOltDriver(NetworkDriver):
         for command in cmds:
             self._send_command(command)
 
-    def convert_software_version_xml_to_json(self, xml_data):
-        """Convert software management version xml data to json format"""
+    def convert_software_version_xml_to_dict(self, xml_data):
+        """Convert software management version xml data to dict format"""
 
         if xml_data:
             for line in xml_data.splitlines():
@@ -131,10 +131,10 @@ class NokiaOltDriver(NetworkDriver):
                     line = line.replace(">", " ").replace("<", " ").replace("name=", "")
                     line = line.split()
                     software = f"{line[-2]}"
-                    return json.dumps({'ISAM': software}, indent=2)
+                    return {'ISAM': software}
 
-    def convert_xml_to_json(self, xml_data):
-        """Convert xml data to json format"""
+    def convert_xml_to_dict(self, xml_data):
+        """Convert xml data to dict format"""
 
         if xml_data:
             root = """"""
@@ -152,11 +152,9 @@ class NokiaOltDriver(NetworkDriver):
                     value = element.text
                     data[name] = value
                 instances.append(data)
-            return json.dumps(instances, indent=2)
-
+            return instances
         else:
             return
-
 
     def _convert_xml_elem_to_dict(self, elem=None):
         """
@@ -288,7 +286,7 @@ class NokiaOltDriver(NetworkDriver):
                 port_list.append(port_raw)
         port_list.sort()
         facts["interface_list"] = port_list
-        return json.dumps(facts, indent=4)
+        return facts
 
     def get_vlans(self):
         """
@@ -330,7 +328,7 @@ class NokiaOltDriver(NetworkDriver):
             ):
                 vlans[vlan_id]["interfaces"].append(port)
 
-        return json.dumps(vlans, indent=4)
+        return vlans
 
     def get_equipment_ont_status_xpon(self):
         """
@@ -356,7 +354,7 @@ class NokiaOltDriver(NetworkDriver):
         command = "show equipment ont status x-pon"
         data = self._send_command(command, xml_format=True)
         if data:
-            return self.convert_xml_to_json(data)
+            return self.convert_xml_to_dict(data)
         else:
             return f"No available data from the {self.hostname}"
 
@@ -385,7 +383,7 @@ class NokiaOltDriver(NetworkDriver):
         command = "show equipment ont interface"
         data = self._send_command(command, xml_format=True)
         if data:
-            return self.convert_xml_to_json(data)
+            return self.convert_xml_to_dict(data)
         else:
             return f"No available data from the {self.hostname}"
 
@@ -413,7 +411,7 @@ class NokiaOltDriver(NetworkDriver):
         command = "show equipment ont status pon"
         data = self._send_command(command, xml_format=True)
         if data:
-            return self.convert_xml_to_json(data)
+            return self.convert_xml_to_dict(data)
         else:
             return f"No available data from the {self.hostname}"
 
@@ -438,7 +436,7 @@ class NokiaOltDriver(NetworkDriver):
         command = "show vlan residential-bridge extensive"
         data = self._send_command(command, xml_format=True)
         if data:
-            return self.convert_xml_to_json(data)
+            return self.convert_xml_to_dict(data)
         else:
             return f"No available data from the {self.hostname}"
 
@@ -461,7 +459,7 @@ class NokiaOltDriver(NetworkDriver):
         command = "show pon unprovision-onu"
         data = self._send_command(command, xml_format=True)
         if data:
-            return self.convert_xml_to_json(data)
+            return self.convert_xml_to_dict(data)
         else:
             return f"No available data from the {self.hostname}"
 
@@ -470,7 +468,7 @@ class NokiaOltDriver(NetworkDriver):
         command = "show equipment slot"
         data = self._send_command(command, xml_format=True)
         if data:
-            return self.convert_xml_to_json(data)
+            return self.convert_xml_to_dict(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
@@ -479,7 +477,7 @@ class NokiaOltDriver(NetworkDriver):
         command = "show equipment slot detail"
         data = self._send_command(command, xml_format=True)
         if data:
-            return self.convert_xml_to_json(data)
+            return self.convert_xml_to_dict(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
@@ -488,7 +486,7 @@ class NokiaOltDriver(NetworkDriver):
         command = "show equipment ont slot"
         data = self._send_command(command, xml_format=True)
         if data:
-            return self.convert_xml_to_json(data)
+            return self.convert_xml_to_dict(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
@@ -497,7 +495,7 @@ class NokiaOltDriver(NetworkDriver):
         command = "show equipment ont optics"
         data = self._send_command(command, xml_format=True)
         if data:
-            return self.convert_xml_to_json(data)
+            return self.convert_xml_to_dict(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
@@ -506,7 +504,7 @@ class NokiaOltDriver(NetworkDriver):
         command = "show pon optics"
         data = self._send_command(command, xml_format=True)
         if data:
-            return self.convert_xml_to_json(data)
+            return self.convert_xml_to_dict(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
@@ -516,7 +514,7 @@ class NokiaOltDriver(NetworkDriver):
         data = self._send_command(command, xml_format=True)
         if data:
             if data:
-                return self.convert_xml_to_json(data)
+                return self.convert_xml_to_dict(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
@@ -525,7 +523,7 @@ class NokiaOltDriver(NetworkDriver):
         command = "show vlan fdb-board"
         data = self._send_command(command, xml_format=True)
         if data:
-            return self.convert_xml_to_json(data)
+            return self.convert_xml_to_dict(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
@@ -534,7 +532,7 @@ class NokiaOltDriver(NetworkDriver):
         command = "show ethernet ont operational-data"
         data = self._send_command(command, xml_format=True)
         if data:
-            return self.convert_xml_to_json(data)
+            return self.convert_xml_to_dict(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
@@ -543,7 +541,7 @@ class NokiaOltDriver(NetworkDriver):
         command = "show equipment ont sw-version"
         data = self._send_command(command, xml_format=True)
         if data:
-            return self.convert_xml_to_json(data)
+            return self.convert_xml_to_dict(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
@@ -552,7 +550,7 @@ class NokiaOltDriver(NetworkDriver):
         command = "show software-mngt version etsi"
         data = self._send_command(command, xml_format=True)
         if data:
-            return self.convert_software_version_xml_to_json(data)
+            return self.convert_software_version_xml_to_dict(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
@@ -561,7 +559,7 @@ class NokiaOltDriver(NetworkDriver):
         command = "show equipment transceiver-inventor"
         data = self._send_command(command, xml_format=True)
         if data:
-            return self.convert_xml_to_json(data)
+            return self.convert_xml_to_dict(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
@@ -570,7 +568,7 @@ class NokiaOltDriver(NetworkDriver):
         command = "show equipment diagnostics sfp"
         data = self._send_command(command, xml_format=True)
         if data:
-            return self.convert_xml_to_json(data)
+            return self.convert_xml_to_dict(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
@@ -579,7 +577,7 @@ class NokiaOltDriver(NetworkDriver):
             command = "show vlan name"
             data = self._send_command(command, xml_format=True)
             if data:
-                return self.convert_xml_to_json(data)
+                return self.convert_xml_to_dict(data)
             else:
                 return f"No available ** {command} ** data from the {self.hostname}"
 
@@ -589,8 +587,8 @@ class NokiaOltDriver(NetworkDriver):
         data = self._send_command(command, xml_format=True)
 
         if data:
-            tmp_data = self.convert_xml_to_json(data)
-            loaded_data = json.loads(tmp_data)
+            tmp_data = self.convert_xml_to_dict(data)
+            loaded_data = tmp_data
             new_dict = {}
 
             for entry in loaded_data:
@@ -607,7 +605,7 @@ class NokiaOltDriver(NetworkDriver):
                             break
                 if port_ not in new_dict.keys():
                     new_dict[port_] = [(vlan_id_, mac_)]
-            return json.dumps(new_dict, indent=4)
+            return new_dict
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
@@ -616,6 +614,6 @@ class NokiaOltDriver(NetworkDriver):
         command = "show equipment temperature"
         data = self._send_command(command, xml_format=True)
         if data:
-            return self.convert_xml_to_json(data)
+            return self.convert_xml_to_dict(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
