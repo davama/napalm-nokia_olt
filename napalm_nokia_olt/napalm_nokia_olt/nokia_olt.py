@@ -169,6 +169,19 @@ class NokiaOltDriver(NetworkDriver):
             data[key_name] = key_value
         return data
 
+    def cli(self, commands):
+        """A generic function that allows the client to send any command to the remote device"""
+
+        output = {}
+        try:
+            for cmd in commands:
+                output[cmd] = self.device.send_command(cmd)
+            return output
+        except (socket.error, EOFError) as e:
+            return str(e)
+
+
+
     def get_config(self, retrieve="all", full=False, sanitized=False):
         """
         get_config for sros_isam.
