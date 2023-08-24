@@ -642,6 +642,5 @@ class NokiaOltDriver(NetworkDriver):
         for sub in data:
             for key in sub:
                 if key == 'server-ip-addrv6':
-                    print(key)
                     ntp_servers[key].append(sub[key])
         return dict(ntp_servers)
