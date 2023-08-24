@@ -7,6 +7,7 @@ import socket
 from netmiko import ConnectHandler
 from napalm.base.base import NetworkDriver
 import xml.etree.ElementTree as ET
+from collections import defaultdict
 import json
 
 
@@ -630,3 +631,17 @@ class NokiaOltDriver(NetworkDriver):
             return self.convert_xml_to_dict(data)
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
+
+    def get_ntp_servers(self):
+        """Returns IPV6 NTP servers."""
+        command = "show sntp server-tablev6 "
+        data = self._send_command(command, xml_format=True)
+        data = self.convert_xml_to_dict(data)
+
+        ntp_servers = defaultdict(list)
+        for sub in data:
+            for key in sub:
+                if key == 'server-ip-addrv6':
+                    print(key)
+                    ntp_servers[key].append(sub[key])
+        return dict(ntp_servers)
