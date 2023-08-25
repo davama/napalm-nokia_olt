@@ -26,5 +26,8 @@
   <li>get_vlan_name</li>
   <li>get_vlan_bridge_port_fdb</li>
   <li>get_equipment_temperature</li>
+  <li>cli</li>
+  <li>get_ntp_servers</li>
+  <li>get_interfaces</li>
 </ul>
 <p>Each function will always return the output as dict data-type </p>
