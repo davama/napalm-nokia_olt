@@ -9,7 +9,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="napalm_nokia_olt",
-    version="0.0.36",
+    version="0.0.37",
     author="Dave Macias",
     author_email = "davama@gmail.com",
     description=("Network Automation and Programmability Abstraction "
