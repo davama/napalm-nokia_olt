@@ -8,7 +8,6 @@ from netmiko import ConnectHandler
 from napalm.base.base import NetworkDriver
 import xml.etree.ElementTree as ET
 from collections import defaultdict
-import json
 
 
 
@@ -20,7 +19,7 @@ class NokiaOltDriver(NetworkDriver):
             hostname,
             username,
             password,
-            timeout=60,
+            timeout=300,
             optional_args=None
     ):
         if optional_args is None:
@@ -68,10 +67,9 @@ class NokiaOltDriver(NetworkDriver):
         self.profile = ["sros_isam"]
 
     def _send_command(self, command, xml_format=False):
-        """
-        Send command to device with xml_format option
-        """
-        # if true; append xml to the end of the command
+        """Send command to device with xml_format option"""
+        # if true;
+            # append xml to the end of the command
         if xml_format:
             command = command + " " + "xml"
         output = self.device.send_command(command, expect_string=r"#$")
@@ -158,9 +156,7 @@ class NokiaOltDriver(NetworkDriver):
             return
 
     def _convert_xml_elem_to_dict(self, elem=None):
-        """
-        convert xml output to dict data
-        """
+        """convert xml output to dict """
         data = {}
         for e in elem.iter():
             if "instance" == e.tag:
@@ -181,12 +177,9 @@ class NokiaOltDriver(NetworkDriver):
         except (socket.error, EOFError) as e:
             return str(e)
 
-
-
     def get_config(self, retrieve="all", full=False, sanitized=False):
-        """
-        get_config for sros_isam.
-        """
+        """Returns running config"""
+
         configs = {
             "running": "",
             "startup": "No Startup",
@@ -205,7 +198,6 @@ class NokiaOltDriver(NetworkDriver):
                 for line in non_empty_lines:
                     string_without_empty_lines += line + "\n"
                 configs["running"] = string_without_empty_lines
-
         if retrieve.lower() in ("startup", "all"):
             pass
         return configs
@@ -222,11 +214,7 @@ class NokiaOltDriver(NetworkDriver):
                     return f"{line_list[nokia_index + 1]} {line_list[nokia_index + 2]}"
 
     def get_facts(self):
-        """
-        get_facts for device
-        note:
-            serial_number and model are taken from the chassis (shelf 1/1)
-        """
+        """Returns facts for device"""
         model_command = "admin display-config"
         hostname_command = "show equipment isam detail"
         os_command = "show software-mngt version ansi"
@@ -303,9 +291,7 @@ class NokiaOltDriver(NetworkDriver):
         return facts
 
     def get_vlans(self):
-        """
-        get_vlans function
-        """
+        """Returns vlans info"""
         vlan_name_command = "show vlan name"
         tagging_command = "show vlan residential-bridge extensive"
 
@@ -465,7 +451,7 @@ class NokiaOltDriver(NetworkDriver):
           <res-id name="alarm-idx" short-name="alarm-idx" type="Alarm::genAlarmIndex">69</res-id>
           <info name="gpon-index" short-name="gpon-index" type="Gpon::PonId">x-pon:1/1/1/12</info>
           <info name="sernum" short-name="sernum" type="Gpon::SerNum1">ALCLBFFF8523</info>
-          <info name="subscriber-locid" short-name="subscriber-locid" type="Gpon::SubsLocId">&quot;                                                                     &quot;</info>
+          <info name="subscriber-locid" short-name="subscriber-locid" type="Gpon::SubsLocId">&quot;&quot;</info>
           <info name="logical-authid" short-name="logical-authid" type="Gpon::LogAuthId"></info>
           <info name="actual-us-rate" short-name="actual-us-rate" type="Gpon::ActualUsRate">10g</info>
         </instance>
@@ -478,7 +464,7 @@ class NokiaOltDriver(NetworkDriver):
             return f"No available data from the {self.hostname}"
 
     def get_equipment_slot(self):
-        """"""
+        """Returns equipments slot info"""
         command = "show equipment slot"
         data = self._send_command(command, xml_format=True)
         if data:
@@ -487,7 +473,7 @@ class NokiaOltDriver(NetworkDriver):
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_equipment_slot_detail(self):
-        """"""
+        """Returns slot details info"""
         command = "show equipment slot detail"
         data = self._send_command(command, xml_format=True)
         if data:
@@ -496,7 +482,7 @@ class NokiaOltDriver(NetworkDriver):
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_equipment_ont_slot(self):
-        """"""
+        """Returns ont slot info"""
         command = "show equipment ont slot"
         data = self._send_command(command, xml_format=True)
         if data:
@@ -505,7 +491,7 @@ class NokiaOltDriver(NetworkDriver):
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_equipment_ont_optics(self):
-        """"""
+        """Returns ont optics info"""
         command = "show equipment ont optics"
         data = self._send_command(command, xml_format=True)
         if data:
@@ -514,7 +500,7 @@ class NokiaOltDriver(NetworkDriver):
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_pon_optics(self):
-        """"""
+        """Returns pon optic info"""
         command = "show pon optics"
         data = self._send_command(command, xml_format=True)
         if data:
@@ -523,7 +509,7 @@ class NokiaOltDriver(NetworkDriver):
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_equipment_ont_sw_downloads(self):
-        """"""
+        """Returns software download info"""
         command = "show equipment ont sw-download"
         data = self._send_command(command, xml_format=True)
         if data:
@@ -533,7 +519,7 @@ class NokiaOltDriver(NetworkDriver):
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_vlan_fdb_board(self):
-        """"""
+        """Returns VLAN info"""
         command = "show vlan fdb-board"
         data = self._send_command(command, xml_format=True)
         if data:
@@ -542,7 +528,7 @@ class NokiaOltDriver(NetworkDriver):
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_ethernet_ont_operational_data(self):
-        """"""
+        """Returns ethernet - ont operational info"""
         command = "show ethernet ont operational-data"
         data = self._send_command(command, xml_format=True)
         if data:
@@ -551,7 +537,7 @@ class NokiaOltDriver(NetworkDriver):
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_equipment_ont_sw_version(self):
-        """"""
+        """Returns ont software versions"""
         command = "show equipment ont sw-version"
         data = self._send_command(command, xml_format=True)
         if data:
@@ -560,7 +546,7 @@ class NokiaOltDriver(NetworkDriver):
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_software_mngt_version_etsi(self):
-        """"""
+        """Returns software version for management """
         command = "show software-mngt version etsi"
         data = self._send_command(command, xml_format=True)
         if data:
@@ -569,7 +555,7 @@ class NokiaOltDriver(NetworkDriver):
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_equipment_transceiver_inventor(self):
-        """"""
+        """Returns transceiver inventory info"""
         command = "show equipment transceiver-inventor"
         data = self._send_command(command, xml_format=True)
         if data:
@@ -578,7 +564,7 @@ class NokiaOltDriver(NetworkDriver):
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_equipment_diagnostics_sfp(self):
-        """"""
+        """Returns Equipment diagnostic info"""
         command = "show equipment diagnostics sfp"
         data = self._send_command(command, xml_format=True)
         if data:
@@ -587,7 +573,7 @@ class NokiaOltDriver(NetworkDriver):
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_vlan_name(self):
-            """"""
+            """Returns VLANs info"""
             command = "show vlan name"
             data = self._send_command(command, xml_format=True)
             if data:
@@ -596,7 +582,7 @@ class NokiaOltDriver(NetworkDriver):
                 return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_vlan_bridge_port_fdb(self):
-        """"""
+        """Returns VLANs info details"""
         command = "show vlan bridge-port-fdb"
         data = self._send_command(command, xml_format=True)
 
@@ -624,7 +610,7 @@ class NokiaOltDriver(NetworkDriver):
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_equipment_temperature(self):
-        """"""
+        """Returns Equipment temperature"""
         command = "show equipment temperature"
         data = self._send_command(command, xml_format=True)
         if data:
@@ -644,3 +630,24 @@ class NokiaOltDriver(NetworkDriver):
                 if key == 'server-ip-addrv6':
                     ntp_servers[key].append(sub[key])
         return dict(ntp_servers)
+
+    def get_interfaces(self):
+        """Returns a list of all interfaces in a dict"""
+        port_command = "show interface port"
+        port_output = self._send_command(port_command, xml_format=True)
+        port_xml_tree = ET.fromstring(port_output)
+
+        interfaces = {}
+        port_list = []
+
+        # get a list of interfaces
+        for elem in port_xml_tree.findall(".//instance"):
+            dummy_data = self._convert_xml_elem_to_dict(elem=elem)
+            if "port" in dummy_data:
+                port_raw = dummy_data["port"]
+                if "vlan" in port_raw:
+                    continue
+                port_list.append(port_raw)
+        port_list.sort()
+        interfaces["interface_list"] = port_list
+        return interfaces
