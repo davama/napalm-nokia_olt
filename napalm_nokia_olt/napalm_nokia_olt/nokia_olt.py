@@ -172,7 +172,8 @@ class NokiaOltDriver(NetworkDriver):
         output = {}
         try:
             for cmd in commands:
-                output[cmd] = self.device.send_command(cmd)
+               # output[cmd] = self.device.send_command(cmd)
+                output[cmd] = self._send_command(cmd)
             return output
         except (socket.error, EOFError) as e:
             return str(e)
