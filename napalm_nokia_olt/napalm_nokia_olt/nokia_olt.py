@@ -178,6 +178,14 @@ class NokiaOltDriver(NetworkDriver):
         except (socket.error, EOFError) as e:
             return str(e)
 
+    def send_single_command(self, cmd):
+        """A generic function that allows the client to send any command to the remote device"""
+
+        output = self._send_command(cmd)
+        return output
+
+
+
     def get_config(self, retrieve="all", full=False, sanitized=False):
         """Returns running config"""
 
