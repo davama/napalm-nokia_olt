@@ -72,7 +72,7 @@ class NokiaOltDriver(NetworkDriver):
             # append xml to the end of the command
         if xml_format:
             command = command + " " + "xml"
-        output = self.device.send_command(command, expect_string=r"#$")
+        output = self.device.send_command(command, expect_string=r"(#|$)")
         return output
 
     def open(self):
@@ -172,10 +172,9 @@ class NokiaOltDriver(NetworkDriver):
         output = {}
         try:
             for cmd in commands:
-               # output[cmd] = self.device.send_command(cmd)
                 output[cmd] = self._send_command(cmd)
             return output
-        except (socket.error, EOFError) as e:
+        except Exception as e:
             return str(e)
 
     def send_single_command(self, cmd):
@@ -183,8 +182,6 @@ class NokiaOltDriver(NetworkDriver):
 
         output = self._send_command(cmd)
         return output
-
-
 
     def get_config(self, retrieve="all", full=False, sanitized=False):
         """Returns running config"""
