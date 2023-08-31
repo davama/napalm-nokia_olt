@@ -29,5 +29,6 @@
   <li>cli</li>
   <li>get_ntp_servers</li>
   <li>get_interfaces</li>
+  <li>send_single_command</li>
 </ul>
 <p>Each function will always return the output as dict data-type </p>
