@@ -67,13 +67,17 @@ class NokiaOltDriver(NetworkDriver):
         self.profile = ["sros_isam"]
 
     def _send_command(self, command, xml_format=False):
-        """Send command to device with xml_format option"""
+        """Send command to device"""
         # if true;
             # append xml to the end of the command
         if xml_format:
             command = command + " " + "xml"
-        output = self.device.send_command(command, expect_string=r"(#|$)")
-        return output
+            if command.startswith("show") or command.startswith("info"):
+                output = self.device.send_command(command, expect_string=r"#$")
+                return output
+            else:
+                output = self.device.send_command(command, expect_string=r"(#|$)")
+                return output
 
     def open(self):
         """Open an SSH tunnel connection to the device."""
