@@ -10,7 +10,6 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 
 
-
 class NokiaOltDriver(NetworkDriver):
     """NAPALM Nokia OLT Handler."""
 
@@ -72,7 +71,10 @@ class NokiaOltDriver(NetworkDriver):
             # append xml to the end of the command
         if xml_format:
             command = command + " " + "xml"
-            if command.startswith("show") or command.startswith("info"):
+            if "show" in command:
+                output = self.device.send_command(command, expect_string=r"#$")
+                return output
+            elif "info" in command:
                 output = self.device.send_command(command, expect_string=r"#$")
                 return output
             else:
@@ -138,7 +140,6 @@ class NokiaOltDriver(NetworkDriver):
 
     def convert_xml_to_dict(self, xml_data):
         """Convert xml data to dict format"""
-
         if xml_data:
             root = """"""
             for line in xml_data.splitlines():

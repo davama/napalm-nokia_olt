@@ -9,7 +9,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="napalm_nokia_olt",
-    version="0.0.41",
+    version="0.0.46",
     author="Dave Macias",
     author_email = "davama@gmail.com",
     description=("Network Automation and Programmability Abstraction "
@@ -26,5 +26,5 @@ setuptools.setup(
         "License :: OSI Approved :: BSD License",
     ],
     include_package_data=True,
-    install_requires=('napalm>=3','xmltodict'),
+    install_requires=('napalm>=3','xmltodict', 'sshFRIEND'),
 )   
