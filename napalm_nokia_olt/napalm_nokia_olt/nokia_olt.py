@@ -9,7 +9,6 @@ from napalm.base.base import NetworkDriver
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 
-
 class NokiaOltDriver(NetworkDriver):
     """NAPALM Nokia OLT Handler."""
 
@@ -18,7 +17,7 @@ class NokiaOltDriver(NetworkDriver):
             hostname,
             username,
             password,
-            timeout=300,
+            timeout=60,
             optional_args=None
     ):
         if optional_args is None:
@@ -67,19 +66,18 @@ class NokiaOltDriver(NetworkDriver):
 
     def _send_command(self, command, xml_format=False):
         """Send command to device"""
-        # if true;
+        # if true:
             # append xml to the end of the command
         if xml_format:
             command = command + " " + "xml"
-            if "show" in command:
-                output = self.device.send_command(command, expect_string=r"#$")
-                return output
-            elif "info" in command:
-                output = self.device.send_command(command, expect_string=r"#$")
-                return output
-            else:
-                output = self.device.send_command(command, expect_string=r"(#|$)")
-                return output
+            output = self.device.send_command(command, expect_string=r"#$")
+            return output
+            # elif "info" in command:
+            #     output = self.device.send_command(command, expect_string=r"#$")
+            #     return output
+            # else:
+            #     output = self.device.send_command(command, expect_string=r"(#|$)")
+            #     return output
 
     def open(self):
         """Open an SSH tunnel connection to the device."""
