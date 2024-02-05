@@ -318,9 +318,7 @@ class NokiaOltDriver(NetworkDriver):
             dummy_data = self._convert_xml_elem_to_dict(elem=elem)
             vlan_id = int(dummy_data["vlan-id"])
             port_raw = dummy_data["vlan-port"]
-            port = ":".join(
-                port_raw.replace("vlan-port", "uni").split(":")[0:2]
-            )
+            port = port_raw.split(":")[1]
             if (
                 "single-tagged" in dummy_data["transmit-mode"]
                 or "untagged" in dummy_data["transmit-mode"]
