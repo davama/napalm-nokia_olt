@@ -307,7 +307,7 @@ class NokiaOltDriver(NetworkDriver):
         # create default dict and get vlan_id and name
         for elem in output_xml_tree.findall(".//instance"):
             dummy_data = self._convert_xml_elem_to_dict(elem=elem)
-            primary_key = dummy_data["id"]
+            primary_key = int(dummy_data["id"])
             if primary_key not in vlans:
                 vlans[primary_key] = {}
                 vlans[primary_key]["name"] = dummy_data["name"]
@@ -316,7 +316,7 @@ class NokiaOltDriver(NetworkDriver):
         # get tagged/untagged ports
         for elem in tag_xml_tree.findall(".//instance"):
             dummy_data = self._convert_xml_elem_to_dict(elem=elem)
-            vlan_id = dummy_data["vlan-id"]
+            vlan_id = int(dummy_data["vlan-id"])
             port_raw = dummy_data["vlan-port"]
             port = ":".join(
                 port_raw.replace("vlan-port", "uni").split(":")[0:2]
