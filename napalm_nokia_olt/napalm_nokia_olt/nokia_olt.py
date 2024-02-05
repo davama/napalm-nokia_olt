@@ -631,22 +631,64 @@ class NokiaOltDriver(NetworkDriver):
         return dict(ntp_servers)
 
     def get_interfaces(self):
-        """Returns a list of all interfaces in a dict"""
-        port_command = "show interface port"
-        port_output = self._send_command(port_command, xml_format=True)
-        port_xml_tree = ET.fromstring(port_output)
+        """
+        Returns a dictionary of dictionaries for all interfaces
 
-        interfaces = {}
-        port_list = []
+        Example Output:
+        {
+            '1/1/1/1/1': {'is_enabled': True,
+            'is_up': True,
+            'description': 'test description',
+            'mac_address': '0000.0000.0000',
+            'last_flapped': -1.0,
+            'mtu': 0,
+            'speed': 1000}
+        }
 
-        # get a list of interfaces
-        for elem in port_xml_tree.findall(".//instance"):
+        mac_address is not implemented
+        last_flapped is not implemented
+        mtu is not implemented
+
+        """
+        pon_command = "show equipment ont status pon"
+        xpon_command = "show equipment ont status x-pon"
+        pon_output = self._send_command(pon_command, xml_format=True)
+        xpon_output = self._send_command(xpon_command, xml_format=True)
+        pon_xml_tree = ET.fromstring(pon_output)
+        xpon_xml_tree = ET.fromstring(xpon_output)
+
+        interface_dict = {}
+        
+        # parse 1GE ports
+        for elem in pon_xml_tree.findall(".//instance"):
             dummy_data = self._convert_xml_elem_to_dict(elem=elem)
-            if "port" in dummy_data:
-                port_raw = dummy_data["port"]
-                if "vlan" in port_raw:
-                    continue
-                port_list.append(port_raw)
-        port_list.sort()
-        interfaces["interface_list"] = port_list
-        return interfaces
+            if "ont" in dummy_data:
+                is_enabled = bool("up" in dummy_data.get("admin-status", ""))
+                is_up = bool("up" in dummy_data.get("oper-status", ""))
+                interface_dict[dummy_data["ont"]] = {
+                    "is_enabled": is_enabled,
+                    "is_up": is_up,
+                    "description": dummy_data.get("desc1", ""),
+                    "mac_address": "0000.0000.0000",
+                    "last_flapped": -1.0,
+                    "mtu": 0,
+                    "speed": 1000,
+                }
+        
+        # parse 10GE ports (X-PON)
+        for elem in xpon_xml_tree.findall(".//instance"):
+            dummy_data = self._convert_xml_elem_to_dict(elem=elem)
+            if "ont" in dummy_data:
+                is_enabled = bool("up" in dummy_data.get("admin-status", ""))
+                is_up = bool("up" in dummy_data.get("oper-status", ""))
+                interface_dict[dummy_data["ont"]] = {
+                    "is_enabled": is_enabled,
+                    "is_up": is_up,
+                    "description": dummy_data.get("desc1", ""),
+                    "mac_address": "0000.0000.0000",
+                    "last_flapped": -1.0,
+                    "mtu": 0,
+                    "speed": 10000,
+                }
+
+        return interface_dict
