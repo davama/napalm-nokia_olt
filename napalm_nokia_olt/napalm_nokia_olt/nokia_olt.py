@@ -219,7 +219,7 @@ class NokiaOltDriver(NetworkDriver):
         os_command = "show software-mngt version ansi"
         uptime_command = "show core1-uptime"
         sn_command = "show equipment shelf 1/1 detail"
-        port_command = "show interface port"
+        port_command = "show equipment ont interface"
 
         hostname_output = self._send_command(hostname_command, xml_format=True)
         os_output = self._send_command(os_command, xml_format=True)
@@ -283,11 +283,8 @@ class NokiaOltDriver(NetworkDriver):
         # get interface_list
         for elem in port_xml_tree.findall(".//instance"):
             dummy_data = self._convert_xml_elem_to_dict(elem=elem)
-            if "port" in dummy_data:
-                port_raw = dummy_data["port"]
-                if "vlan" in port_raw:
-                    continue
-                port_list.append(port_raw)
+            if "ont-idx" in dummy_data:
+                port_list.append(dummy_data["ont-idx"])
         port_list.sort()
         facts["interface_list"] = port_list
         return facts
