@@ -70,12 +70,6 @@ class NokiaOltDriver(NetworkDriver):
             command += " xml"
         output = self.device.send_command(command, expect_string=r"#$")
         return output
-            # elif "info" in command:
-            #     output = self.device.send_command(command, expect_string=r"#$")
-            #     return output
-            # else:
-            #     output = self.device.send_command(command, expect_string=r"(#|$)")
-            #     return output
 
     def open(self):
         """Open an SSH tunnel connection to the device."""
@@ -90,8 +84,6 @@ class NokiaOltDriver(NetworkDriver):
             **self.netmiko_optional_args,
         )
         self._prep_session()
-        # ensure in enable mode
-        # self.device.enable()
 
     def close(self):
         """Close the connection to the device."""
@@ -583,13 +575,13 @@ class NokiaOltDriver(NetworkDriver):
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_vlan_name(self):
-            """Returns VLANs info"""
-            command = "show vlan name"
-            data = self._send_command(command, xml_format=True)
-            if data:
-                return self.convert_xml_to_dict(data)
-            else:
-                return f"No available ** {command} ** data from the {self.hostname}"
+        """Returns VLANs info"""
+        command = "show vlan name"
+        data = self._send_command(command, xml_format=True)
+        if data:
+            return self.convert_xml_to_dict(data)
+        else:
+            return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_vlan_bridge_port_fdb(self):
         """Returns VLANs info details"""
