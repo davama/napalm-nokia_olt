@@ -285,7 +285,7 @@ class NokiaOltDriver(NetworkDriver):
             dummy_data = self._convert_xml_elem_to_dict(elem=elem)
             if "ont-idx" in dummy_data:
                 port_list.append(dummy_data["ont-idx"])
-        port_list.sort()
+        port_list.sort(key=lambda p: list(map(int, p.split("/"))))
         facts["interface_list"] = port_list
         return facts
 
