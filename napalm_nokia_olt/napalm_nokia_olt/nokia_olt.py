@@ -66,12 +66,10 @@ class NokiaOltDriver(NetworkDriver):
 
     def _send_command(self, command, xml_format=False):
         """Send command to device"""
-        # if true:
-            # append xml to the end of the command
         if xml_format:
-            command = command + " " + "xml"
-            output = self.device.send_command(command, expect_string=r"#$")
-            return output
+            command += " xml"
+        output = self.device.send_command(command, expect_string=r"#$")
+        return output
             # elif "info" in command:
             #     output = self.device.send_command(command, expect_string=r"#$")
             #     return output
@@ -274,6 +272,9 @@ class NokiaOltDriver(NetworkDriver):
             if "serial-no" in dummy_data:
                 serial_number = dummy_data["serial-no"]
                 facts["serial_number"] = serial_number
+            if "variant" in dummy_data:
+                variant = dummy_data["variant"]
+                facts["model"] += f" ({variant})"
 
         # get uptime
         for line in uptime_output.splitlines():
