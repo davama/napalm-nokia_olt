@@ -6,6 +6,10 @@
   <li>get_config</li>
   <li>get_facts</li>
   <li>get_vlans</li>
+  <li>is_alive</li>
+  <li>get_interfaces</li>
+  <li>get_lldp_neighbors</li>
+  <li>get_lldp_neighbors_detail</li>
   <li>get_equipment_ont_status_xpon</li>
   <li>get_equipment_ont_interfaces</li>
   <li>get_equipment_ont_status_pon</li>
@@ -28,7 +32,6 @@
   <li>get_equipment_temperature</li>
   <li>cli</li>
   <li>get_ntp_servers</li>
-  <li>get_interfaces</li>
   <li>send_single_command</li>
 </ul>
 <p>Each function will always return the output as dict data-type </p>
