@@ -26,5 +26,5 @@ setuptools.setup(
         "License :: OSI Approved :: BSD License",
     ],
     include_package_data=True,
-    install_requires=('napalm>=3','xmltodict', 'sshFRIEND'),
+    install_requires=('napalm>=3','xmltodict'),
 )   
