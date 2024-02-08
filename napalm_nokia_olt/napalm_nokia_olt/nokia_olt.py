@@ -4,6 +4,7 @@
 from __future__ import print_function
 from __future__ import unicode_literals
 import socket
+import re
 from netmiko import ConnectHandler
 from napalm.base.base import NetworkDriver
 import xml.etree.ElementTree as ET
@@ -630,7 +631,7 @@ class NokiaOltDriver(NetworkDriver):
 
     def get_interfaces(self):
         """
-        Returns a dictionary of dictionaries for all interfaces
+        Returns a dictionary of dictionaries for all ONT interfaces
 
         Example Output:
         {
@@ -656,7 +657,7 @@ class NokiaOltDriver(NetworkDriver):
         xpon_xml_tree = ET.fromstring(xpon_output)
 
         interface_dict = {}
-        
+
         # parse 1GE ports
         for elem in pon_xml_tree.findall(".//instance"):
             dummy_data = self._convert_xml_elem_to_dict(elem=elem)
@@ -672,7 +673,7 @@ class NokiaOltDriver(NetworkDriver):
                     "mtu": 0,
                     "speed": 1000,
                 }
-        
+
         # parse 10GE ports (X-PON)
         for elem in xpon_xml_tree.findall(".//instance"):
             dummy_data = self._convert_xml_elem_to_dict(elem=elem)
@@ -690,3 +691,87 @@ class NokiaOltDriver(NetworkDriver):
                 }
 
         return interface_dict
+
+    def get_lldp_neighbors(self):
+        """Returns a dictionary with LLDP neighbors"""
+        port_command = "show port"
+        port_data = self._send_command(port_command, xml_format=False)
+        ports = []
+        lldp = {}
+        port_regex = r"^(?!=|-|\s|Port|Id.).+$"
+        remote_host_regex = r"^System Name[\s:]+(.+)$"
+        remote_port_regex = r"""^Port Id[\s:]+([0-9a-zA-Z:]+[\n][\s"\/a-zA-Z0-9]+$)"""
+        all_ports = re.findall(port_regex, port_data, re.MULTILINE)
+        for line in all_ports:
+            line = line.split()
+            if len(line) > 0:
+                if not line[-1] == "vport":
+                    ports.append(line[0])
+        for port in ports:
+            lldp_command = f"show port {port} ethernet lldp remote-info"
+            lldp_data = self._send_command(lldp_command, xml_format=False)
+            remote_host = re.search(remote_host_regex, lldp_data, re.MULTILINE)
+            if remote_host:
+                lldp[port] = [{"hostname": remote_host.group(1), "port": ""}]
+                try:
+                    remote_port_data = re.search(remote_port_regex, lldp_data, re.MULTILINE)
+                    remote_port = remote_port_data.group(1).split()[1]
+                    lldp[port][0]["port"] = remote_port.replace('"','')
+                except IndexError:
+                    continue
+        return lldp
+
+    def get_lldp_neighbors_detail(self):
+        """Returns a detailed view of the LLDP neighbors as a dictionary"""
+        port_command = "show port"
+        port_data = self._send_command(port_command, xml_format=False)
+        ports = []
+        lldp = {}
+        port_regex = r"^(?!=|-|\s|Port|Id.).+$"
+        remote_host_regex = r"^System Name[\s:]+(.+)$"
+        remote_port_regex = r"""^Port Id[\s:]+([0-9a-zA-Z:]+[\n][\s"\/a-zA-Z0-9]+$)"""
+        remote_chassis_regex = r"^Chassis Id[\s]{3,}[:\s](.+)$"
+        remote_port_descr_regex = r"^Port Description[:\s]+(.+)$"
+        remote_sys_descr_regex = r"(?<=^System Description)\s*:\s(.*)(?=\n\n\n)"
+        remote_sys_cap_regex = r"^Supported Caps[\s:]+(.+)$"
+        remote_sys_en_cap_regex = r"^Enabled Caps[\s:]+(.+)$"
+        all_ports = re.findall(port_regex, port_data, re.MULTILINE)
+        for line in all_ports:
+            line = line.split()
+            if len(line) > 0:
+                if not line[-1] == "vport":
+                    ports.append(line[0])
+        for port in ports:
+            lldp_command = f"show port {port} ethernet lldp remote-info"
+            lldp_data = self._send_command(lldp_command, xml_format=False)
+            remote_host = re.findall(remote_host_regex, lldp_data, re.MULTILINE)
+            if len(remote_host) > 0:
+                lldp[port] = [
+                    {"parent_interface": port,
+                     "remote_chassis_id": "",
+                     "remote_system_name": remote_host[0],
+                     "remote_port": "",
+                     "remote_port_description": "",
+                     "remote_system_description": "",
+                     "remote_system_capab": "",
+                     "remote_system_enable_capab": "",
+                     }
+                ]
+                remote_chassis_id_data =  re.search(remote_chassis_regex, lldp_data, re.MULTILINE)
+                remote_port_descr_data =  re.search(remote_port_descr_regex, lldp_data, re.MULTILINE)
+                remote_sys_descr_data = re.search(remote_sys_descr_regex, lldp_data, flags = re.S | re.M)
+                remote_sys_cap_data = re.search(remote_sys_cap_regex, lldp_data, re.MULTILINE)
+                remote_sys_en_cap_data = re.search(remote_sys_en_cap_regex, lldp_data, re.MULTILINE)
+                lldp[port][0]["remote_chassis_id"] = remote_chassis_id_data.group(1)
+                lldp[port][0]["remote_port_description"] = remote_port_descr_data.group(1)
+                lldp[port][0]["remote_system_description"] = remote_sys_descr_data.group(1)
+                lldp[port][0]["remote_system_description"] = ' '.join(lldp[port][0]["remote_system_description"].split())
+                lldp[port][0]["remote_system_capab"] = remote_sys_cap_data.group(1)
+                lldp[port][0]["remote_system_enable_capab"] = remote_sys_en_cap_data.group(1)
+                try:
+                    remote_port_data = re.search(remote_port_regex, lldp_data, re.MULTILINE)
+                    remote_port = remote_port_data.group(1).split()[1]
+                    lldp[port][0]["remote_port"] = remote_port.replace('"','')
+                except IndexError:
+                    continue
+        return lldp
