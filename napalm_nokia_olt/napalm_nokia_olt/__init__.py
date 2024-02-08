@@ -4,4 +4,4 @@
 from napalm_nokia_olt.nokia_olt import NokiaOltDriver
 __all__ = ("NokiaOltDriver",)
 
-__version__ = "0.0.47"
+__version__ = "0.0.48"
