@@ -565,7 +565,7 @@ class NokiaOltDriver(NetworkDriver):
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
 
-    def get_software_mngt_version_etsi(self):
+    def get_software_mgmt_version_etsi(self):
         """Returns software version for management """
         command = "show software-mngt version etsi"
         data = self._send_command(command, xml_format=True)
