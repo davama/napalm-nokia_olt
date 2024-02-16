@@ -24,14 +24,7 @@ REMOTE_SYS_EN_CAP_REGEX = r"^Enabled Caps[\s:]+(.+)$"
 class NokiaOltDriver(NetworkDriver):
     """NAPALM Nokia OLT Handler."""
 
-    def __init__(
-            self,
-            hostname,
-            username,
-            password,
-            timeout=60,
-            optional_args=None
-    ):
+    def __init__(self, hostname, username, password, timeout=60, optional_args=None):
         if optional_args is None:
             optional_args = {}
         self.transport = optional_args.get("transport", "ssh")
@@ -111,9 +104,7 @@ class NokiaOltDriver(NetworkDriver):
             try:
                 # Try sending ASCII null byte to maintain the connection alive
                 self.device.write_channel(null)
-                return {
-                    "is_alive": self.device.remote_conn.transport.is_active()
-                }
+                return {"is_alive": self.device.remote_conn.transport.is_active()}
             except (socket.error, EOFError):
                 # If unable to send, we can tell for sure that the connection
                 # is unusable
@@ -136,7 +127,7 @@ class NokiaOltDriver(NetworkDriver):
                     line = line.replace(">", " ").replace("<", " ").replace("name=", "")
                     line = line.split()
                     software = f"{line[-2]}"
-                    return {'ISAM': software}
+                    return {"ISAM": software}
 
     def convert_xml_to_list(self, xml_data):
         """Convert xml data to list format"""
@@ -152,7 +143,7 @@ class NokiaOltDriver(NetworkDriver):
             for instance_elem in root.findall("instance"):
                 data = {}
                 for element in instance_elem:
-                    name = element.attrib['name']
+                    name = element.attrib["name"]
                     value = element.text
                     data[name] = value
                 instances.append(data)
@@ -161,7 +152,7 @@ class NokiaOltDriver(NetworkDriver):
             return
 
     def _convert_xml_elem_to_dict(self, elem=None):
-        """convert xml output to dict """
+        """convert xml output to dict"""
         data = {}
         for e in elem.iter():
             if "instance" == e.tag:
@@ -203,11 +194,7 @@ class NokiaOltDriver(NetworkDriver):
     def get_config(self, retrieve="all", full=False, sanitized=False):
         """Returns running config"""
 
-        configs = {
-            "running": "",
-            "startup": "No Startup",
-            "candidate": "No Candidate"
-        }
+        configs = {"running": "", "startup": "No Startup", "candidate": "No Candidate"}
 
         if retrieve in ("all", "running"):
             command = "info configure"
@@ -226,7 +213,7 @@ class NokiaOltDriver(NetworkDriver):
         return configs
 
     def make_device_model(self, data):
-        """get device model, by parsing the "admin display-config' cmd output """
+        """get device model, by parsing the "admin display-config' cmd output"""
 
         if data:
             lines = data.splitlines()
@@ -250,7 +237,7 @@ class NokiaOltDriver(NetworkDriver):
         uptime_output = self._send_command(uptime_command)
         sn_output = self._send_command(sn_command, xml_format=True)
         port_output = self._send_command(port_command, xml_format=True)
-        model_output = self._send_command(model_command,xml_format=False)
+        model_output = self._send_command(model_command, xml_format=False)
         device_model = self.make_device_model(model_output)
 
         hostname_xml_tree = ET.fromstring(hostname_output)
@@ -318,10 +305,7 @@ class NokiaOltDriver(NetworkDriver):
         vlan_name_command = "show vlan name"
         tagging_command = "show vlan residential-bridge extensive"
 
-        vlan_name_output = self._send_command(
-            vlan_name_command,
-            xml_format=True
-        )
+        vlan_name_output = self._send_command(vlan_name_command, xml_format=True)
         tagging_output = self._send_command(tagging_command, xml_format=True)
 
         output_xml_tree = ET.fromstring(vlan_name_output)
@@ -431,7 +415,7 @@ class NokiaOltDriver(NetworkDriver):
         command = "show equipment ont status pon"
         data = self._send_command(command, xml_format=True)
         if data:
-            data_list =  self.convert_xml_to_list(data)
+            data_list = self.convert_xml_to_list(data)
             return self._convert_list_to_dict(data_list, "ont")
         else:
             return f"No available data from the {self.hostname}"
@@ -551,7 +535,7 @@ class NokiaOltDriver(NetworkDriver):
         command = "show vlan fdb-board"
         data = self._send_command(command, xml_format=True)
         if data:
-            data_list =  self.convert_xml_to_list(data)
+            data_list = self.convert_xml_to_list(data)
             return self._convert_list_to_dict(data_list, "mac")
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
@@ -577,7 +561,7 @@ class NokiaOltDriver(NetworkDriver):
             return f"No available ** {command} ** data from the {self.hostname}"
 
     def get_software_mgmt_version_etsi(self):
-        """Returns software version for management """
+        """Returns software version for management"""
         command = "show software-mngt version etsi"
         data = self._send_command(command, xml_format=True)
         if data:
@@ -600,7 +584,7 @@ class NokiaOltDriver(NetworkDriver):
         command = "show equipment diagnostics sfp"
         data = self._send_command(command, xml_format=True)
         if data:
-            data_list =  self.convert_xml_to_list(data)
+            data_list = self.convert_xml_to_list(data)
             return self._convert_list_to_dict(data_list, "position")
         else:
             return f"No available ** {command} ** data from the {self.hostname}"
@@ -625,9 +609,9 @@ class NokiaOltDriver(NetworkDriver):
             new_dict = {}
 
             for entry in loaded_data:
-                port_ = entry['port']
-                vlan_id_ = entry['vlan-id']
-                mac_ = entry['mac']
+                port_ = entry["port"]
+                vlan_id_ = entry["vlan-id"]
+                mac_ = entry["mac"]
 
                 if port_ in new_dict.keys():
                     tmp_data = new_dict[port_]
@@ -661,7 +645,7 @@ class NokiaOltDriver(NetworkDriver):
         ntp_servers = defaultdict(list)
         for sub in data:
             for key in sub:
-                if key == 'server-ip-addrv6':
+                if key == "server-ip-addrv6":
                     ntp_servers[key].append(sub[key])
         return dict(ntp_servers)
 
@@ -747,9 +731,11 @@ class NokiaOltDriver(NetworkDriver):
             if remote_host:
                 lldp[port] = [{"hostname": remote_host.group(1), "port": ""}]
                 try:
-                    remote_port_data = re.search(REMOTE_PORT_REGEX, lldp_data, re.MULTILINE)
+                    remote_port_data = re.search(
+                        REMOTE_PORT_REGEX, lldp_data, re.MULTILINE
+                    )
                     remote_port = remote_port_data.group(1).split()[1]
-                    lldp[port][0]["port"] = remote_port.replace('"','')
+                    lldp[port][0]["port"] = remote_port.replace('"', "")
                 except IndexError:
                     continue
         return lldp
@@ -772,31 +758,52 @@ class NokiaOltDriver(NetworkDriver):
             remote_host = re.findall(REMOTE_HOST_REGEX, lldp_data, re.MULTILINE)
             if len(remote_host) > 0:
                 lldp[port] = [
-                    {"parent_interface": port,
-                     "remote_chassis_id": "",
-                     "remote_system_name": remote_host[0],
-                     "remote_port": "",
-                     "remote_port_description": "",
-                     "remote_system_description": "",
-                     "remote_system_capab": "",
-                     "remote_system_enable_capab": "",
-                     }
+                    {
+                        "parent_interface": port,
+                        "remote_chassis_id": "",
+                        "remote_system_name": remote_host[0],
+                        "remote_port": "",
+                        "remote_port_description": "",
+                        "remote_system_description": "",
+                        "remote_system_capab": "",
+                        "remote_system_enable_capab": "",
+                    }
                 ]
-                remote_chassis_id_data =  re.search(REMOTE_CHASSIS_REGEX, lldp_data, re.MULTILINE)
-                remote_port_descr_data =  re.search(REMOTE_PORT_DESCR_REGEX, lldp_data, re.MULTILINE)
-                remote_sys_descr_data = re.search(REMOTE_SYS_DESCR_REGEX, lldp_data, flags = re.S | re.M)
-                remote_sys_cap_data = re.search(REMOTE_SYS_CAP_REGEX, lldp_data, re.MULTILINE)
-                remote_sys_en_cap_data = re.search(REMOTE_SYS_EN_CAP_REGEX, lldp_data, re.MULTILINE)
+                remote_chassis_id_data = re.search(
+                    REMOTE_CHASSIS_REGEX, lldp_data, re.MULTILINE
+                )
+                remote_port_descr_data = re.search(
+                    REMOTE_PORT_DESCR_REGEX, lldp_data, re.MULTILINE
+                )
+                remote_sys_descr_data = re.search(
+                    REMOTE_SYS_DESCR_REGEX, lldp_data, flags=re.S | re.M
+                )
+                remote_sys_cap_data = re.search(
+                    REMOTE_SYS_CAP_REGEX, lldp_data, re.MULTILINE
+                )
+                remote_sys_en_cap_data = re.search(
+                    REMOTE_SYS_EN_CAP_REGEX, lldp_data, re.MULTILINE
+                )
                 lldp[port][0]["remote_chassis_id"] = remote_chassis_id_data.group(1)
-                lldp[port][0]["remote_port_description"] = remote_port_descr_data.group(1)
-                lldp[port][0]["remote_system_description"] = remote_sys_descr_data.group(1)
-                lldp[port][0]["remote_system_description"] = ' '.join(lldp[port][0]["remote_system_description"].split())
+                lldp[port][0]["remote_port_description"] = remote_port_descr_data.group(
+                    1
+                )
+                lldp[port][0][
+                    "remote_system_description"
+                ] = remote_sys_descr_data.group(1)
+                lldp[port][0]["remote_system_description"] = " ".join(
+                    lldp[port][0]["remote_system_description"].split()
+                )
                 lldp[port][0]["remote_system_capab"] = remote_sys_cap_data.group(1)
-                lldp[port][0]["remote_system_enable_capab"] = remote_sys_en_cap_data.group(1)
+                lldp[port][0][
+                    "remote_system_enable_capab"
+                ] = remote_sys_en_cap_data.group(1)
                 try:
-                    remote_port_data = re.search(REMOTE_PORT_REGEX, lldp_data, re.MULTILINE)
+                    remote_port_data = re.search(
+                        REMOTE_PORT_REGEX, lldp_data, re.MULTILINE
+                    )
                     remote_port = remote_port_data.group(1).split()[1]
-                    lldp[port][0]["remote_port"] = remote_port.replace('"','')
+                    lldp[port][0]["remote_port"] = remote_port.replace('"', "")
                 except IndexError:
                     continue
         return lldp
