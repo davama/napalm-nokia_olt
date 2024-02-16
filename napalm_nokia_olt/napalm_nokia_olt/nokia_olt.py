@@ -10,6 +10,17 @@ from napalm.base.base import NetworkDriver
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 
+
+PORT_REGEX = r"^(?!=|-|\s|Port|Id.).+$"
+REMOTE_HOST_REGEX = r"^System Name[\s:]+(.+)$"
+REMOTE_PORT_REGEX = r"""^Port Id[\s:]+([0-9a-zA-Z:]+[\n]{0,}[\s"\/a-zA-Z0-9]+$)"""
+REMOTE_CHASSIS_REGEX = r"^Chassis Id[\s]{3,}[:\s](.+)$"
+REMOTE_PORT_DESCR_REGEX = r"^Port Description[:\s]+(.+)$"
+REMOTE_SYS_DESCR_REGEX = r"(?<=^System Description)\s*:\s(.*)(?=\n\n\n)"
+REMOTE_SYS_CAP_REGEX = r"^Supported Caps[\s:]+(.+)$"
+REMOTE_SYS_EN_CAP_REGEX = r"^Enabled Caps[\s:]+(.+)$"
+
+
 class NokiaOltDriver(NetworkDriver):
     """NAPALM Nokia OLT Handler."""
 
@@ -723,10 +734,7 @@ class NokiaOltDriver(NetworkDriver):
         port_data = self._send_command(port_command, xml_format=False)
         ports = []
         lldp = {}
-        port_regex = r"^(?!=|-|\s|Port|Id.).+$"
-        remote_host_regex = r"^System Name[\s:]+(.+)$"
-        remote_port_regex = r"""^Port Id[\s:]+([0-9a-zA-Z:]+[\n][\s"\/a-zA-Z0-9]+$)"""
-        all_ports = re.findall(port_regex, port_data, re.MULTILINE)
+        all_ports = re.findall(PORT_REGEX, port_data, re.MULTILINE)
         for line in all_ports:
             line = line.split()
             if len(line) > 0:
@@ -735,11 +743,11 @@ class NokiaOltDriver(NetworkDriver):
         for port in ports:
             lldp_command = f"show port {port} ethernet lldp remote-info"
             lldp_data = self._send_command(lldp_command, xml_format=False)
-            remote_host = re.search(remote_host_regex, lldp_data, re.MULTILINE)
+            remote_host = re.search(REMOTE_HOST_REGEX, lldp_data, re.MULTILINE)
             if remote_host:
                 lldp[port] = [{"hostname": remote_host.group(1), "port": ""}]
                 try:
-                    remote_port_data = re.search(remote_port_regex, lldp_data, re.MULTILINE)
+                    remote_port_data = re.search(REMOTE_PORT_REGEX, lldp_data, re.MULTILINE)
                     remote_port = remote_port_data.group(1).split()[1]
                     lldp[port][0]["port"] = remote_port.replace('"','')
                 except IndexError:
@@ -752,15 +760,7 @@ class NokiaOltDriver(NetworkDriver):
         port_data = self._send_command(port_command, xml_format=False)
         ports = []
         lldp = {}
-        port_regex = r"^(?!=|-|\s|Port|Id.).+$"
-        remote_host_regex = r"^System Name[\s:]+(.+)$"
-        remote_port_regex = r"""^Port Id[\s:]+([0-9a-zA-Z:]+[\n][\s"\/a-zA-Z0-9]+$)"""
-        remote_chassis_regex = r"^Chassis Id[\s]{3,}[:\s](.+)$"
-        remote_port_descr_regex = r"^Port Description[:\s]+(.+)$"
-        remote_sys_descr_regex = r"(?<=^System Description)\s*:\s(.*)(?=\n\n\n)"
-        remote_sys_cap_regex = r"^Supported Caps[\s:]+(.+)$"
-        remote_sys_en_cap_regex = r"^Enabled Caps[\s:]+(.+)$"
-        all_ports = re.findall(port_regex, port_data, re.MULTILINE)
+        all_ports = re.findall(PORT_REGEX, port_data, re.MULTILINE)
         for line in all_ports:
             line = line.split()
             if len(line) > 0:
@@ -769,7 +769,7 @@ class NokiaOltDriver(NetworkDriver):
         for port in ports:
             lldp_command = f"show port {port} ethernet lldp remote-info"
             lldp_data = self._send_command(lldp_command, xml_format=False)
-            remote_host = re.findall(remote_host_regex, lldp_data, re.MULTILINE)
+            remote_host = re.findall(REMOTE_HOST_REGEX, lldp_data, re.MULTILINE)
             if len(remote_host) > 0:
                 lldp[port] = [
                     {"parent_interface": port,
@@ -782,11 +782,11 @@ class NokiaOltDriver(NetworkDriver):
                      "remote_system_enable_capab": "",
                      }
                 ]
-                remote_chassis_id_data =  re.search(remote_chassis_regex, lldp_data, re.MULTILINE)
-                remote_port_descr_data =  re.search(remote_port_descr_regex, lldp_data, re.MULTILINE)
-                remote_sys_descr_data = re.search(remote_sys_descr_regex, lldp_data, flags = re.S | re.M)
-                remote_sys_cap_data = re.search(remote_sys_cap_regex, lldp_data, re.MULTILINE)
-                remote_sys_en_cap_data = re.search(remote_sys_en_cap_regex, lldp_data, re.MULTILINE)
+                remote_chassis_id_data =  re.search(REMOTE_CHASSIS_REGEX, lldp_data, re.MULTILINE)
+                remote_port_descr_data =  re.search(REMOTE_PORT_DESCR_REGEX, lldp_data, re.MULTILINE)
+                remote_sys_descr_data = re.search(REMOTE_SYS_DESCR_REGEX, lldp_data, flags = re.S | re.M)
+                remote_sys_cap_data = re.search(REMOTE_SYS_CAP_REGEX, lldp_data, re.MULTILINE)
+                remote_sys_en_cap_data = re.search(REMOTE_SYS_EN_CAP_REGEX, lldp_data, re.MULTILINE)
                 lldp[port][0]["remote_chassis_id"] = remote_chassis_id_data.group(1)
                 lldp[port][0]["remote_port_description"] = remote_port_descr_data.group(1)
                 lldp[port][0]["remote_system_description"] = remote_sys_descr_data.group(1)
@@ -794,7 +794,7 @@ class NokiaOltDriver(NetworkDriver):
                 lldp[port][0]["remote_system_capab"] = remote_sys_cap_data.group(1)
                 lldp[port][0]["remote_system_enable_capab"] = remote_sys_en_cap_data.group(1)
                 try:
-                    remote_port_data = re.search(remote_port_regex, lldp_data, re.MULTILINE)
+                    remote_port_data = re.search(REMOTE_PORT_REGEX, lldp_data, re.MULTILINE)
                     remote_port = remote_port_data.group(1).split()[1]
                     lldp[port][0]["remote_port"] = remote_port.replace('"','')
                 except IndexError:
