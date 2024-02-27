@@ -305,11 +305,7 @@ class NokiaOltDriver(NetworkDriver):
             vlan_id = int(dummy_data["vlan-id"])
             port_raw = dummy_data["vlan-port"]
             port = port_raw.split(":")[1]
-            if (
-                "single-tagged" in dummy_data["transmit-mode"]
-                or "untagged" in dummy_data["transmit-mode"]
-            ):
-                vlans[vlan_id]["interfaces"].append(port)
+            vlans[vlan_id]["interfaces"].append(port)
 
         return vlans
 
@@ -629,11 +625,50 @@ class NokiaOltDriver(NetworkDriver):
 
     def get_interfaces(self):
         """
+        Returns a dictionary of dictionaries for all interfaces
+
+        Example Output:
+        {
+            'uni:1/1/1/1/1/1/1': {'is_enabled': True,
+            'is_up': True,
+            'description': '',
+            'mac_address': '0000.0000.0000',
+            'last_flapped': -1.0,
+            'mtu': 0,
+            'speed': 1000}
+        }
+
+        mac_address is not implemented
+        last_flapped is not implemented
+        mtu is not implemented
+
+        """
+        interface_dict = self.get_interfaces_ont()
+        command = "show interface port"
+        output = self._send_command(command, xml_format=True)
+        xml_tree = ET.fromstring(output)
+        for elem in xml_tree.findall(".//instance"):
+            dummy_data = self._convert_xml_elem_to_dict(elem=elem)
+            is_enabled = bool("up" in dummy_data.get("admin-status", ""))
+            is_up = bool("up" in dummy_data.get("oper-status", ""))
+            interface_dict[dummy_data["port"]] = {
+                "is_enabled": is_enabled,
+                "is_up": is_up,
+                "description": dummy_data.get("desc1", ""),
+                "mac_address": "0000.0000.0000",
+                "last_flapped": -1.0,
+                "mtu": 0,
+                "speed": 1000,
+            }
+        return interface_dict
+
+    def get_interfaces_ont(self):
+        """
         Returns a dictionary of dictionaries for all ONT interfaces
 
         Example Output:
         {
-            '1/1/1/1/1': {'is_enabled': True,
+            'ont:1/1/1/1/1': {'is_enabled': True,
             'is_up': True,
             'description': 'test description',
             'mac_address': '0000.0000.0000',
@@ -662,7 +697,8 @@ class NokiaOltDriver(NetworkDriver):
             if "ont" in dummy_data:
                 is_enabled = bool("up" in dummy_data.get("admin-status", ""))
                 is_up = bool("up" in dummy_data.get("oper-status", ""))
-                interface_dict[dummy_data["ont"]] = {
+                interface_name = "ont:" + dummy_data["ont"]
+                interface_dict[interface_name] = {
                     "is_enabled": is_enabled,
                     "is_up": is_up,
                     "description": dummy_data.get("desc1", ""),
@@ -678,7 +714,8 @@ class NokiaOltDriver(NetworkDriver):
             if "ont" in dummy_data:
                 is_enabled = bool("up" in dummy_data.get("admin-status", ""))
                 is_up = bool("up" in dummy_data.get("oper-status", ""))
-                interface_dict[dummy_data["ont"]] = {
+                interface_name = "ont:" + dummy_data["ont"]
+                interface_dict[interface_name] = {
                     "is_enabled": is_enabled,
                     "is_up": is_up,
                     "description": dummy_data.get("desc1", ""),
