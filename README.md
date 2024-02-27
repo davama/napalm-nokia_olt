@@ -8,6 +8,7 @@
   <li>get_vlans</li>
   <li>is_alive</li>
   <li>get_interfaces</li>
+  <li>get_interfaces_ont</li>
   <li>get_lldp_neighbors</li>
   <li>get_lldp_neighbors_detail</li>
   <li>get_equipment_ont_status_xpon</li>
