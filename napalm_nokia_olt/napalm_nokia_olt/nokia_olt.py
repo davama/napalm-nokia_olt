@@ -651,15 +651,16 @@ class NokiaOltDriver(NetworkDriver):
             dummy_data = self._convert_xml_elem_to_dict(elem=elem)
             is_enabled = bool("up" in dummy_data.get("admin-status", ""))
             is_up = bool("up" in dummy_data.get("oper-status", ""))
-            interface_dict[dummy_data["port"]] = {
-                "is_enabled": is_enabled,
-                "is_up": is_up,
-                "description": dummy_data.get("desc1", ""),
-                "mac_address": "0000.0000.0000",
-                "last_flapped": -1.0,
-                "mtu": 0,
-                "speed": 1000,
-            }
+            if not interface_dict.get(dummy_data["port"]):
+                interface_dict[dummy_data["port"]] = {
+                    "is_enabled": is_enabled,
+                    "is_up": is_up,
+                    "description": dummy_data.get("desc1", ""),
+                    "mac_address": "0000.0000.0000",
+                    "last_flapped": -1.0,
+                    "mtu": 0,
+                    "speed": 1000,
+                }
         return interface_dict
 
     def get_interfaces_ont(self):
