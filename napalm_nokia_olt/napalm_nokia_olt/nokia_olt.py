@@ -7,6 +7,7 @@ import socket
 import re
 from netmiko import ConnectHandler
 from napalm.base.base import NetworkDriver
+from napalm.base.netmiko_helpers import netmiko_args
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 
@@ -36,31 +37,8 @@ class NokiaOltDriver(NetworkDriver):
         """Netmiko possible arguments that can be injected from outside
             - For example: optional_args={"read_timeout_override": 300}
         """
-
-        netmiko_argument_map = {
-            "port": None,
-            "secret": "",
-            "verbose": False,
-            "keepalive": 30,
-            "global_delay_factor": 1,
-            "use_keys": False,
-            "key_file": None,
-            "ssh_strict": False,
-            "system_host_keys": False,
-            "alt_host_keys": False,
-            "alt_key_file": "",
-            "ssh_config_file": None,
-            "session_log": None,
-            "read_timeout_override": None,
-        }
-
-        # Build dict of any optional Netmiko args
-        self.netmiko_optional_args = {}
-        for k, v in netmiko_argument_map.items():
-            try:
-                self.netmiko_optional_args[k] = optional_args[k]
-            except KeyError:
-                pass
+        self.netmiko_optional_args = netmiko_args(optional_args)
+  
         self.global_delay_factor = optional_args.get("global_delay_factor", 1)
         self.port = optional_args.get("port", 22)
 
